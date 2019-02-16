@@ -118,7 +118,7 @@ callbacks = [
         monitor=f'val_{args.n}-shot_{args.k}-way_acc'
     ),
     ReduceLROnPlateau(patience=10, factor=0.5, monitor=f'val_loss'),
-    CSVLogger(PATH + f'/logs/semantic_classifier/{param_str}.csv'),
+    # CSVLogger(PATH + f'/logs/semantic_classifier/{param_str}.csv'),
 ]
 
 fit(
