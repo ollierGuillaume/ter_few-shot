@@ -7,6 +7,7 @@ from torch.optim import Optimizer
 from torch.nn import Module
 from torch.utils.data import DataLoader
 from typing import Callable, List, Union
+from collections.abc import Iterable
 
 from few_shot.callbacks import DefaultCallback, ProgressBarLogger, CallbackList, Callback
 from few_shot.metrics import NAMED_METRICS
@@ -25,6 +26,8 @@ def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: tor
     model.train()
     optimiser.zero_grad()
     y_pred = model(x)
+    if len(y_pred) == 2:
+        y_pred, _ = y_pred
     loss = loss_fn(y_pred, y)
     loss.backward()
     optimiser.step()

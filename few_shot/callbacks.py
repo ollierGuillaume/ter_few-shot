@@ -224,7 +224,6 @@ class CSVLogger(Callback):
             mode = 'a'
         else:
             mode = 'w'
-
         self.csv_file = io.open(self.filename,
                                 mode + self.file_flags,
                                 **self._open_args)
@@ -376,6 +375,8 @@ class ReduceLROnPlateau(Callback):
             self.cooldown_counter -= 1
             self.wait = 0
 
+        print("current:",current)
+        print("best:", self.best)
         if self.monitor_op(current, self.best):
             self.best = current
             self.wait = 0

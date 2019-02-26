@@ -54,19 +54,32 @@ if __name__ == '__main__':
     else:
         raise (ValueError('Unsupported dataset'))
 
-    param_str = str(args.dataset)+'__n='+str(args.n)+'_k='+str(args.k)+'_epochs='
-    +str(args.epochs)+'__lr='+str(args.lr)
+    param_str = f'{args.dataset}__n={args.n}_k={args.k}_epochs={args.epochs}__lr={args.lr}'
     #            f'train_steps={args.inner_train_steps}_val_steps={args.inner_val_steps}'
     print(param_str)
 
     ###################
     # Create datasets #
     ###################
+    validation_split = .2
+
+    split = int(np.floor(validation_split * args.n))
+
     background = dataset_class('background')
 
-    background_taskloader = DataLoader(
+    classes = np.random.choice(background.df['class_id'].unique(), size=args.k)
+    for i in classes:
+        background.df[background.df['class_id'] == i] = background.df[background.df['class_id'] == i].sample(frac=1)
+
+    train_dataloader = DataLoader(
         background,
-        batch_sampler=BasicSampler(background, n=args.n, k=args.k),
+        batch_sampler=BasicSampler(background, validation_split, True, classes, n=args.n),
+        num_workers=8
+    )
+
+    eval_dataloader = DataLoader(
+        background,
+        batch_sampler=BasicSampler(background, validation_split, False, classes, n=args.n),
         num_workers=8
     )
     # evaluation = dataset_class('evaluation')
@@ -79,8 +92,8 @@ if __name__ == '__main__':
     ############
     # Training #
     ############
-    print('Training semantic classifier on '+str(args.dataset)+'...')
-    model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size).to(device, dtype=torch.double)
+    print(f'Training semantic classifier on {args.dataset}...')
+    model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size, size_binary_layer = 10).to(device, dtype=torch.double)
     optimiser = torch.optim.Adam(model.parameters(), lr=args.lr)
     loss_fn = nn.CrossEntropyLoss().to(device)
 
@@ -91,10 +104,9 @@ if __name__ == '__main__':
             x = x.double().cuda()
             # Create dummy 0-(num_classes - 1) label
             y = create_nshot_task_label(k, n).cuda()
-            print("x shpae:", x.shape)
-            for e in x:
-                plt.imshow(e.cpu().squeeze().numpy())
-                plt.show()
+            # for e in x:
+            #     plt.imshow(e.cpu().squeeze().numpy())
+            #     plt.show()
             return x, y
 
         return prepare_batch_
@@ -103,29 +115,21 @@ if __name__ == '__main__':
     progressbar = ProgressBarLogger()
     progressbar.set_params({'num_batches': args.k*args.n, 'metrics': ['categorical_accuracy'], 'loss': loss_fn,
                             'verbose': 1})
+    evalmetrics = EvaluateMetrics(eval_dataloader)
+    evalmetrics.set_params({'metrics': ['categorical_accuracy'],
+                            'prepare_batch': prepare_batch(args.n, args.k),
+                            'loss_fn': loss_fn})
+
     callbacks = [
-        # EvaluateFewShot(
-        #     eval_fn=meta_gradient_step,
-        #     num_tasks=args.eval_batches,
-        #     n_shot=args.n,
-        #     k_way=args.k,
-        #     q_queries=args.q,
-        #     taskloader=evaluation_taskloader,
-        #     prepare_batch=prepare_batch(args.n, args.k, args.q, args.meta_batch_size),
-        #     # MAML kwargs
-        #     inner_train_steps=args.inner_val_steps,
-        #     inner_lr=args.inner_lr,
-        #     device=device,
-        #     order=args.order,
-        # ),
+        evalmetrics,
         progressbar,
 
         ModelCheckpoint(
-            filepath=os.path.join(PATH, 'models', 'semantic_classifier', str(param_str)+'.pth'),
-            monitor='val_'+str(args.n)+'-shot_'+str(args.k)+'-way_acc'
+            filepath=os.path.join(PATH, 'models', 'semantic_classifier', f'{param_str}.pth'),
+            monitor=f'val_{args.n}-shot_{args.k}-way_acc'
         ),
-        # ReduceLROnPlateau(patience=10, factor=0.5, monitor=f'val_loss'),
-        CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', str(param_str)+'.csv'))
+        ReduceLROnPlateau(patience=10, factor=0.5, monitor=f'val_loss'),
+        CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', f'{param_str}.csv'))
     ]
 
 
@@ -134,7 +138,7 @@ if __name__ == '__main__':
         optimiser,
         loss_fn,
         epochs=args.epochs,
-        dataloader=background_taskloader,
+        dataloader=train_dataloader,
         prepare_batch=prepare_batch(args.n, args.k),
         callbacks=callbacks,
         metrics=['categorical_accuracy'],

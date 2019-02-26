@@ -10,11 +10,12 @@ import os
 
 from config import DATA_PATH
 
+import torchvision.transforms
+
 
 class OmniglotDataset(Dataset):
     def __init__(self, subset):
         """Dataset class representing Omniglot dataset
-
         # Arguments:
             subset: Whether the dataset represents the background or evaluation set
         """
@@ -57,10 +58,8 @@ class OmniglotDataset(Dataset):
     @staticmethod
     def index_subset(subset):
         """Index a subset by looping through all of its files and recording relevant information.
-
         # Arguments
             subset: Name of the subset
-
         # Returns
             A list of dicts containing information about all the image files in a particular subset of the
             Omniglot dataset dataset

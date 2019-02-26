@@ -17,13 +17,10 @@ class NShotTaskSampler(Sampler):
                  num_tasks: int = 1,
                  fixed_tasks: List[Iterable[int]] = None):
         """PyTorch Sampler subclass that generates batches of n-shot, k-way, q-query tasks.
-
         Each n-shot task contains a "support set" of `k` sets of `n` samples and a "query set" of `k` sets
         of `q` samples. The support set and the query set are all grouped into one Tensor such that the first n * k
         samples are from the support set while the remaining q * k samples are from the query set.
-
         The support and query sets are sampled such that they are disjoint i.e. do not contain overlapping samples.
-
         # Arguments
             dataset: Instance of torch.utils.data.Dataset from which to draw samples
             episodes_per_epoch: Arbitrary number of batches of n-shot tasks to generate in one epoch
@@ -76,9 +73,6 @@ class NShotTaskSampler(Sampler):
                     for i, s in support.iterrows():
                         batch.append(s['id'])
 
-                if self.q is None:  # Code added by Ollier TODO delete comment
-                    continue
-
                 for k in episode_classes:
                     query = df[(df['class_id'] == k) & (~df['id'].isin(support_k[k]['id']))].sample(self.q)
                     for i, q in query.iterrows():
@@ -86,6 +80,50 @@ class NShotTaskSampler(Sampler):
 
             yield np.stack(batch)
 
+
+class BasicSampler(Sampler):
+    def __init__(self,
+                 dataset: torch.utils.data.Dataset,
+                 validation_split: float,
+                 is_train: bool,
+                 classes: List[int] = None,
+                 n: int = None):
+        super(BasicSampler, self).__init__(dataset)
+
+        self.n = n
+        self.classes = classes
+        self.df = dataset.df[dataset.df['class_id'].isin(self.classes)]
+        self.n_batch = int(len(self.df[self.df['class_id'] == self.classes[0]])/n)
+
+        self.is_train = is_train
+        self.validation_split = validation_split
+        print("n_batch::", self.n_batch, len(self.df[self.df['class_id'] == self.classes[0]]))
+
+    def __iter__(self):
+        print("iter")
+
+        if self.is_train:
+            self.i_batch = 0
+            e = self.n_batch - int(self.n_batch * self.validation_split)
+        else:
+            self.i_batch = self.n_batch - int(self.n_batch * self.validation_split)
+            e = int(self.n_batch * self.validation_split)
+
+        for _ in range(e):
+            batch = []
+            for k in self.classes:
+                data_class = self.df[self.df['class_id'] == k]
+                features = data_class[self.i_batch*self.n:(self.i_batch+1)*self.n]
+                # print("features:", len(features), " data:", len(data_class))
+                for i, s in features.iterrows():
+                    batch.append(s['id'])
+            self.i_batch += 1
+            yield np.stack(batch)
+
+    def __len__(self):
+        if self.is_train:
+            return self.n_batch - int(self.n_batch * self.validation_split)
+        return int(self.n_batch * self.validation_split)
 
 class EvaluateFewShot(Callback):
     """Evaluate a network on  an n-shot, k-way classification tasks after every epoch.
@@ -168,6 +206,7 @@ def prepare_nshot_task(n: int, k: int, q: int) -> Callable:
     # Returns
         prepare_nshot_task_: A Callable that processes a few shot tasks with specified n, k and q
     """
+
     def prepare_nshot_task_(batch: Tuple[torch.Tensor, torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
         """Create 0-k label and move to GPU.
 

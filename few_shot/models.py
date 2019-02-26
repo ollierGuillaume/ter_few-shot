@@ -1,9 +1,13 @@
 from torch import nn
 import numpy as np
 import torch.nn.functional as F
+from torch.autograd import Function
 import torch
 from typing import Dict
 
+
+from distributions import Bernoulli as BernoulliREINFORCE
+from distributions import Round as RoundREINFORCE
 
 ##########
 # Layers #
@@ -126,8 +130,8 @@ class FewShotClassifier(nn.Module):
         """Applies the same forward pass using PyTorch functional operators using a specified set of weights."""
 
         for block in [1, 2, 3, 4]:
-            x = functional_conv_block(x, weights[f'conv{block}.0.weight'], weights[f'conv{block}.0.bias'],
-                                      weights.get(f'conv{block}.1.weight'), weights.get(f'conv{block}.1.bias'))
+            x = functional_conv_block(x, weights['conv'+str(block)+'.0.weight'], weights['conv'+str(block)+'.0.bias'],
+                                      weights.get('conv'+str(block)+'.1.weight'), weights.get('conv'+str(block)+'.1.bias'))
 
         x = x.view(x.size(0), -1)
 
@@ -249,3 +253,154 @@ class AttentionLSTM(nn.Module):
         h = h_hat + queries
 
         return h
+
+
+class Hardsigmoid(nn.Module):
+
+    def __init__(self):
+        super(Hardsigmoid, self).__init__()
+        self.act = nn.Hardtanh()
+
+    def forward(self, x):
+        return (self.act(x) + 1.0) / 2.0
+
+
+class RoundFunctionST(Function):
+    """Rounds a tensor whose values are in [0, 1] to a tensor with values in {0, 1}"""
+
+    @staticmethod
+    def forward(ctx, input):
+        """Forward pass
+
+        Parameters
+        ==========
+        :param input: input tensor
+
+        Returns
+        =======
+        :return: a tensor which is round(input)"""
+
+        # We can cache arbitrary Tensors for use in the backward pass using the
+        # save_for_backward method.
+        # ctx.save_for_backward(input)
+
+        return torch.round(input)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        """In the backward pass we receive a tensor containing the gradient of the
+        loss with respect to the output, and we need to compute the gradient of the
+        loss with respect to the input.
+
+        Parameters
+        ==========
+        :param grad_output: tensor that stores the gradients of the loss wrt. output
+
+        Returns
+        =======
+        :return: tensor that stores the gradients of the loss wrt. input"""
+
+        # This is a pattern that is very convenient - at the top of backward
+        # unpack saved_tensors and initialize all gradients w.r.t. inputs to
+        # None. Thanks to the fact that additional trailing Nones are
+        # ignored, the return statement is simple even when the function has
+        # optional inputs.
+        # input, weight, bias = ctx.saved_variables
+
+        return grad_output
+
+
+class BernoulliFunctionST(Function):
+
+    @staticmethod
+    def forward(ctx, input):
+        return torch.bernoulli(input)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        return grad_output
+
+
+RoundST = RoundFunctionST.apply
+BernoulliST = BernoulliFunctionST.apply
+
+
+class DeterministicBinaryActivation(nn.Module):
+
+    def __init__(self, estimator='ST'):
+        super(DeterministicBinaryActivation, self).__init__()
+
+        assert estimator in ['ST', 'REINFORCE']
+
+        self.estimator = estimator
+        self.act = Hardsigmoid()
+
+        if self.estimator == 'ST':
+            self.binarizer = RoundST
+        elif self.estimator == 'REINFORCE':
+            self.binarizer = RoundREINFORCE
+
+    def forward(self, input):
+        x, slope = input
+        x = self.act(slope * x)
+        x = self.binarizer(x)
+        if self.estimator == 'REINFORCE':
+            x = x.sample()
+        return x
+
+
+class StochasticBinaryActivation(nn.Module):
+
+    def __init__(self, estimator='ST'):
+        super(StochasticBinaryActivation, self).__init__()
+
+        assert estimator in ['ST', 'REINFORCE']
+
+        self.estimator = estimator
+        self.act = Hardsigmoid()
+
+        if self.estimator == 'ST':
+            self.binarizer = BernoulliST
+        elif self.estimator == 'REINFORCE':
+            self.binarizer = BernoulliREINFORCE
+
+    def forward(self, input):
+        x, slope = input
+        probs = self.act(slope * x)
+        out = self.binarizer(probs)
+        if self.estimator == 'REINFORCE':
+            out = out.sample()
+        return out
+
+class SemanticBinaryClassifier(nn.Module):
+    def __init__(self, num_input_channels: int, k_way: int, final_layer_size: int = 64,
+                 size_binary_layer = 10):
+        """
+        # Arguments:
+            num_input_channels: Number of color channels the model expects input data to contain. Omniglot = 1,
+                miniImageNet = 3
+            k_way: Number of classes the model will discriminate between
+            final_layer_size: 64 for Omniglot, 1600 for miniImageNet
+            size_binary_layer: Number of neurons in the last hidden layer
+            (with binary activation)
+        """
+        super(SemanticBinaryClassifier, self).__init__()
+        self.conv1 = conv_block(num_input_channels, 64)
+        self.conv2 = conv_block(64, 64)
+        self.conv3 = conv_block(64, 64)
+        self.conv4 = conv_block(64, 64)
+        self.dense = nn.Linear(final_layer_size, size_binary_layer)
+        self.binary_act = DeterministicBinaryActivation(estimator='ST')
+        self.logits = nn.Linear(size_binary_layer, k_way)
+        self.slope = 1.0
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        x = x.view(x.size(0), -1)
+        x = self.dense(x)
+        x = self.binary_act([x, self.slope])
+
+        return self.logits(x), x
