@@ -91,7 +91,7 @@ if __name__ == '__main__':
     ############
     # Training #
     ############
-    print(f'Training semantic classifier on {args.dataset}...')
+    print('Training semantic classifier on '+str(args.dataset)+'...')
     model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size, size_binary_layer=10).to(device,
                                                                                                          dtype=torch.double)
     optimiser = torch.optim.Adam(model.parameters(), lr=args.lr)
@@ -125,11 +125,11 @@ if __name__ == '__main__':
         progressbar,
 
         ModelCheckpoint(
-            filepath=os.path.join(PATH, 'models', 'semantic_classifier', f'{param_str}.pth'),
-            monitor=f'val_{args.n}-shot_{args.k}-way_acc'
+            filepath=os.path.join(PATH, 'models', 'semantic_classifier', str(param_str) + '.pth'),
+            monitor='val_' + str(args.n) + '-shot_' + str(args.k) + '-way_acc'
         ),
-        ReduceLROnPlateau(patience=10, factor=0.5, monitor=f'val_loss'),
-        CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', f'{param_str}.csv'))
+        ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
+        CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', str(param_str) + '.csv'))
     ]
 
     fit(
