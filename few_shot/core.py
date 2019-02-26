@@ -160,7 +160,7 @@ class EvaluateFewShot(Callback):
         self.prepare_batch = prepare_batch
         self.prefix = prefix
         self.kwargs = kwargs
-        self.metric_name = f'{self.prefix}{self.n_shot}-shot_{self.k_way}-way_acc'
+        self.metric_name = str(self.prefix)+str(self.n_shot)+'-shot_'+str(self.k_way)+'-way_acc'
 
     def on_train_begin(self, logs=None):
         self.loss_fn = self.params['loss_fn']
