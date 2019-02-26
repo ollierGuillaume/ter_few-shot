@@ -36,8 +36,6 @@ if __name__ == '__main__':
     parser.add_argument('--batches', default=100, type=int)
     # parser.add_argument('--eval-batches', default=20, type=int)
 
-
-
     # parser.add_argument('--inner-train-steps', default=1, type=int)
     # parser.add_argument('--inner-val-steps', default=3, type=int)
 
@@ -54,7 +52,8 @@ if __name__ == '__main__':
     else:
         raise (ValueError('Unsupported dataset'))
 
-    param_str = f'{args.dataset}__n={args.n}_k={args.k}_epochs={args.epochs}__lr={args.lr}'
+    param_str = str(args.dataset) + '__n=' + str(args.n) + '_k=' + str(args.k) + \
+                  '_epochs=' + str(args.epochs) + '__lr=' + str(args.lr)
     #            f'train_steps={args.inner_train_steps}_val_steps={args.inner_val_steps}'
     print(param_str)
 
@@ -93,7 +92,8 @@ if __name__ == '__main__':
     # Training #
     ############
     print(f'Training semantic classifier on {args.dataset}...')
-    model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size, size_binary_layer = 10).to(device, dtype=torch.double)
+    model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size, size_binary_layer=10).to(device,
+                                                                                                         dtype=torch.double)
     optimiser = torch.optim.Adam(model.parameters(), lr=args.lr)
     loss_fn = nn.CrossEntropyLoss().to(device)
 
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
 
     progressbar = ProgressBarLogger()
-    progressbar.set_params({'num_batches': args.k*args.n, 'metrics': ['categorical_accuracy'], 'loss': loss_fn,
+    progressbar.set_params({'num_batches': args.k * args.n, 'metrics': ['categorical_accuracy'], 'loss': loss_fn,
                             'verbose': 1})
     evalmetrics = EvaluateMetrics(eval_dataloader)
     evalmetrics.set_params({'metrics': ['categorical_accuracy'],
@@ -131,7 +131,6 @@ if __name__ == '__main__':
         ReduceLROnPlateau(patience=10, factor=0.5, monitor=f'val_loss'),
         CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', f'{param_str}.csv'))
     ]
-
 
     fit(
         model,
