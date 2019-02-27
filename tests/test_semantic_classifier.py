@@ -34,6 +34,7 @@ class TestSemanticClassifier(unittest.TestCase):
         k = 100
         n = 30
         lr = 0.01
+        epochs = 50
         model_name = "omniglot__n=30_k=100_epochs=500__lr=0.01"
         fc_layer_size = 64
         num_input_channels = 1
@@ -109,11 +110,11 @@ class TestSemanticClassifier(unittest.TestCase):
             test_model,
             optimiser,
             loss_fn,
-            epochs=args.epochs,
+            epochs=epochs,
             dataloader=train_dataloader,
-            prepare_batch=prepare_batch(args.n, args.k),
+            prepare_batch=prepare_batch(n, k),
             callbacks=callbacks,
             metrics=['categorical_accuracy'],
             fit_function=gradient_step,
-            fit_function_kwargs={'n_shot': args.n, 'k_way': args.k, 'device': device},
+            fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
