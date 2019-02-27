@@ -35,7 +35,7 @@ class TestSemanticClassifier(unittest.TestCase):
         n = 5
         lr = 0.01
         epochs = 50
-        model_name = "omniglot__n=5_k=200_epochs=600__lr=0.01__size_binary_layer=20"
+        model_name = "omniglot__n=5_k=200_epochs=500__lr=0.01__size_binary_layer=20"
         fc_layer_size = 64
         num_input_channels = 1
 
