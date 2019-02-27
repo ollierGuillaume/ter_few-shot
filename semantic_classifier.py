@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     param_str = str(args.dataset) + '__n=' + str(args.n) + '_k=' + str(args.k) \
                 + '_epochs=' + str(args.epochs) + '__lr=' + str(args.lr) + '__size_binary_layer=' \
-                + str(args.semantic_binary_layer)
+                + str(args.size_binary_layer)
     #            f'train_steps={args.inner_train_steps}_val_steps={args.inner_val_steps}'
     print(param_str)
 
