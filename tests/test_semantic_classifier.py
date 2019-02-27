@@ -38,7 +38,7 @@ class TestSemanticClassifier(unittest.TestCase):
         model_name = "omniglot__n=5_k=200_epochs=500__lr=0.01__size_binary_layer=20"
         fc_layer_size = 64
         num_input_channels = 1
-
+        size_binary_layer = 20
         validation_split = .2
 
         setup_dirs()
@@ -47,8 +47,7 @@ class TestSemanticClassifier(unittest.TestCase):
         device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
 
-
-        model = SemanticBinaryClassifier(1, 100, size_binary_layer=10)
+        model = SemanticBinaryClassifier(1, 100, size_binary_layer=size_binary_layer)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                       model_name+".pth")))
         for param in model.parameters():
