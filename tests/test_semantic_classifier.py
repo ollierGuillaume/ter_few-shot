@@ -47,7 +47,7 @@ class TestSemanticClassifier(unittest.TestCase):
         device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
 
-        model = SemanticBinaryClassifier(1, 100, size_binary_layer=size_binary_layer)
+        model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                       model_name+".pth")))
         for param in model.parameters():
