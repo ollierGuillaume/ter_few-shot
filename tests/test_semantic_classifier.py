@@ -31,11 +31,11 @@ class TestSemanticBinaryClassifier(nn.Module):
 
 class TestSemanticClassifier(unittest.TestCase):
     def test(self):
-        k = 100
-        n = 30
+        k = 200
+        n = 5
         lr = 0.01
         epochs = 50
-        model_name = "omniglot__n=30_k=100_epochs=600__lr=0.01__size_binary_layer=20"
+        model_name = "omniglot__n=5_k=200_epochs=600__lr=0.01__size_binary_layer=20"
         fc_layer_size = 64
         num_input_channels = 1
 
