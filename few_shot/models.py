@@ -372,6 +372,7 @@ class StochasticBinaryActivation(nn.Module):
             out = out.sample()
         return out
 
+
 class SemanticBinaryClassifier(nn.Module):
     def __init__(self, num_input_channels: int, k_way: int, final_layer_size: int = 64,
                  size_binary_layer = 10):
