@@ -9,6 +9,7 @@ from few_shot.callbacks import *
 from few_shot.core import BasicSampler, create_nshot_task_label, EvaluateFewShot, prepare_nshot_task
 from few_shot.utils import setup_dirs
 from few_shot.train import fit, gradient_step
+from torch import nn
 
 import numpy as np
 import os
