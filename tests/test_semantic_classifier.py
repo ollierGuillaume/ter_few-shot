@@ -17,8 +17,7 @@ import os
 
 
 class TestSemanticBinaryClassifier(nn.Module):
-    def __init__(self, num_input_channels: int, k_way: int, semantic_model,
-                 size_binary_layer=10):
+    def __init__(self, k_way: int, semantic_model, size_binary_layer=10):
 
         super(TestSemanticBinaryClassifier, self).__init__()
         self.model = semantic_model
@@ -36,7 +35,6 @@ class TestSemanticClassifier(unittest.TestCase):
         lr = 0.01
         epochs = 50
         model_name = "omniglot__n=5_k=200_epochs=500__lr=0.01__size_binary_layer=20"
-        fc_layer_size = 64
         num_input_channels = 1
         size_binary_layer = 20
         validation_split = .2
@@ -71,8 +69,8 @@ class TestSemanticClassifier(unittest.TestCase):
             num_workers=8
         )
 
-        test_model = TestSemanticBinaryClassifier(num_input_channels, k, model, size_binary_layer=10)\
-            .to(device,dtype=torch.double)
+        test_model = TestSemanticBinaryClassifier(k, model, size_binary_layer=size_binary_layer)\
+            .to(device, dtype=torch.double)
         optimiser = torch.optim.Adam(test_model.parameters(), lr=lr)
         loss_fn = nn.CrossEntropyLoss().to(device)
 

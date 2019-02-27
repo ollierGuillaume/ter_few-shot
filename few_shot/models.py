@@ -375,7 +375,7 @@ class StochasticBinaryActivation(nn.Module):
 
 class SemanticBinaryClassifier(nn.Module):
     def __init__(self, num_input_channels: int, k_way: int, final_layer_size: int = 64,
-                 size_binary_layer = 10):
+                 size_binary_layer=10):
         """
         # Arguments:
             num_input_channels: Number of color channels the model expects input data to contain. Omniglot = 1,
