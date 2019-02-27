@@ -45,7 +45,7 @@ class TestSemanticClassifier(unittest.TestCase):
         device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
 
-        optimiser = torch.optim.Adam(model.parameters(), lr=lr)
+
         model = SemanticBinaryClassifier(1, 100, size_binary_layer=10)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                       "omniglot__n=30_k=100_epochs=500__lr=0.01.pth")))
@@ -72,7 +72,7 @@ class TestSemanticClassifier(unittest.TestCase):
 
         test_model = TestSemanticBinaryClassifier(num_input_channels, k, model, size_binary_layer=10)\
             .to(device,dtype=torch.double)
-        
+        optimiser = torch.optim.Adam(test_model.parameters(), lr=lr)
         loss_fn = nn.CrossEntropyLoss().to(device)
 
         def prepare_batch(n, k):
