@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr', default=0.001, type=float)
     parser.add_argument('--batches', default=100, type=int)
-    parser.add_argument('--size-binary-layer', default=100, type=int)
+    parser.add_argument('--size-binary-layer', default=10, type=int)
     # parser.add_argument('--eval-batches', default=20, type=int)
 
     # parser.add_argument('--inner-train-steps', default=1, type=int)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         raise (ValueError('Unsupported dataset'))
 
     param_str = str(args.dataset) + '__n=' + str(args.n) + '_k=' + str(args.k) + \
-                  '_epochs=' + str(args.epochs) + '__lr=' + str(args.lr)
+                  '_epochs=' + str(args.epochs) + '__lr=' + str(args.lr) + '__size_binary_layer'
     #            f'train_steps={args.inner_train_steps}_val_steps={args.inner_val_steps}'
     print(param_str)
 
