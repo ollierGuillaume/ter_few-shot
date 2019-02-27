@@ -34,7 +34,7 @@ class TestSemanticClassifier(unittest.TestCase):
         k = 100
         n = 30
         lr = 0.01
-
+        model_name = "omniglot__n=30_k=100_epochs=500__lr=0.01"
         fc_layer_size = 64
         num_input_channels = 1
 
@@ -49,7 +49,7 @@ class TestSemanticClassifier(unittest.TestCase):
 
         model = SemanticBinaryClassifier(1, 100, size_binary_layer=10)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
-                                                      "omniglot__n=30_k=100_epochs=500__lr=0.01.pth")))
+                                                      model_name+".pth")))
         for param in model.parameters():
             param.requires_grad = False
 
@@ -98,11 +98,11 @@ class TestSemanticClassifier(unittest.TestCase):
             progressbar,
 
             ModelCheckpoint(
-                filepath=os.path.join(PATH, 'models', 'semantic_classifier', str(param_str) + '.pth'),
+                filepath=os.path.join(PATH, 'models', 'semantic_classifier', model_name + 'test_other_class.pth'),
                 monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
             ),
             ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
-            CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', str(param_str) + '.csv'))
+            CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', model_name + 'test_other_class.csv'))
         ]
 
         fit(
