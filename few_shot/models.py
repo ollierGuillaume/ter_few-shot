@@ -392,9 +392,9 @@ class SemanticBinaryClassifier(nn.Module):
         self.conv4 = conv_block(64, 64)
         self.dense = nn.Linear(final_layer_size, size_binary_layer)
         if stochastic:
-            self.binary_act = DeterministicBinaryActivation(estimator='ST')
-        else:
             self.binary_act = StochasticBinaryActivation(estimator='ST')
+        else:
+            self.binary_act = DeterministicBinaryActivation(estimator='ST')
         self.logits = nn.Linear(size_binary_layer, k_way)
         self.slope = 1.0
 
