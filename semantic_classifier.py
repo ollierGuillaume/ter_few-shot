@@ -36,6 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('--batches', default=100, type=int)
     parser.add_argument('--size-binary-layer', default=10, type=int)
     parser.add_argument('--stochastic', action='store_true')
+    parser.add_argument('--intermediate-dense-layer', default=None, type=int)
     # parser.add_argument('--eval-batches', default=20, type=int)
 
     # parser.add_argument('--inner-train-steps', default=1, type=int)
@@ -98,8 +99,8 @@ if __name__ == '__main__':
     print('Training semantic classifier on '+str(args.dataset)+'...')
     model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size,
                                      size_binary_layer=args.size_binary_layer,
-                                     stochastic=args.stochastic).to(device,
-                                                                                                         dtype=torch.double)
+                                     stochastic=args.stochastic,
+                                     size_dense_layer_before_binary=args.intermediate_dense_layer).to(device, dtype=torch.double)
     optimiser = torch.optim.Adam(model.parameters(), lr=args.lr)
     loss_fn = nn.CrossEntropyLoss().to(device)
 
