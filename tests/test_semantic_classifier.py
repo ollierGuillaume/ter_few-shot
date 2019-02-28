@@ -34,7 +34,7 @@ class TestSemanticClassifier(unittest.TestCase):
         n = 5
         lr = 0.01
         epochs = 50
-        size_binary_layer = 20
+        size_binary_layer = 30
         stochastic = True
         model_name = 'omniglot__n='+str(n)+'_k='+str(k)+'_epochs=500__lr=0.01__size_binary_layer='\
                      +str(size_binary_layer)+('__stochastic' if stochastic else '__deterministic')
