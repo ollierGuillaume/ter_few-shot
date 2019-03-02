@@ -120,6 +120,10 @@ class TestSemanticClassifier(unittest.TestCase):
             CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', model_name + 'test_other_class.csv'))
         ]
 
+        for param in test_model.parameters():
+            print("params test before train:", param[0])
+            break
+
         fit(
             test_model,
             optimiser,
