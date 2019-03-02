@@ -50,11 +50,13 @@ class TestSemanticClassifier(unittest.TestCase):
         model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic)
 
 
-        model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
-                                                      model_name+".pth")))
+        model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier", model_name+".pth")))
+
         for param in model.parameters():
             param.requires_grad = False
+
         print("few param before training:", model.parameters[0][0])
+
         evaluation = OmniglotDataset('evaluation')
 
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
