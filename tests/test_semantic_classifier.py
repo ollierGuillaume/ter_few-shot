@@ -48,7 +48,7 @@ class TestSemanticClassifier(unittest.TestCase):
         size_binary_layer = 30
         stochastic = False
 
-        model_name = 'omniglot__n='+str(n)+'_k='+str(k)+'_epochs='+str(args.epochs)+'__lr=0.01__size_binary_layer='\
+        model_name = 'omniglot__n='+str(n)+'_k='+str(k)+'_epochs='+str(epochs)+'__lr=0.01__size_binary_layer='\
                      +str(size_binary_layer)+('__stochastic' if stochastic else '__deterministic')
         num_input_channels = 1
         validation_split = .2
@@ -121,7 +121,7 @@ class TestSemanticClassifier(unittest.TestCase):
             test_model,
             optimiser,
             loss_fn,
-            epochs=epochs,
+            epochs=10,
             dataloader=train_dataloader,
             prepare_batch=prepare_batch(n, k),
             callbacks=callbacks,
