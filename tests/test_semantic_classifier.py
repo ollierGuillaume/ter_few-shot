@@ -55,7 +55,7 @@ class TestSemanticClassifier(unittest.TestCase):
         for param in model.parameters():
             param.requires_grad = False
 
-        print("few param before training:", model.parameters[0][0])
+        #print("few param before training:", model.parameters[0][0])
 
         evaluation = OmniglotDataset('evaluation')
 
