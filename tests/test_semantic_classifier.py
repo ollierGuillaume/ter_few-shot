@@ -65,9 +65,6 @@ class TestSemanticClassifier(unittest.TestCase):
         for param in model.parameters():
             param.requires_grad = False
 
-        for param in model.parameters():
-            print("params before train:", param[0])
-            break
         evaluation = OmniglotDataset('evaluation')
 
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
@@ -120,14 +117,11 @@ class TestSemanticClassifier(unittest.TestCase):
             CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', model_name + 'test_other_class.csv'))
         ]
 
-        for param in test_model.parameters():
-            print("params test before train:", param[0])
-
         fit(
             test_model,
             optimiser,
             loss_fn,
-            epochs=10,
+            epochs=100,
             dataloader=train_dataloader,
             prepare_batch=prepare_batch(n, k),
             callbacks=callbacks,
@@ -135,6 +129,3 @@ class TestSemanticClassifier(unittest.TestCase):
             fit_function=gradient_step,
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
-
-        for param in test_model.parameters():
-            print("params after train:", param[0])
