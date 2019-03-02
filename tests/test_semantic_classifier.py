@@ -64,7 +64,7 @@ class TestSemanticClassifier(unittest.TestCase):
                                                       model_name+".pth")))
         for param in model.parameters():
             param.requires_grad = False
-
+        print( "params before train:", model.parameters[0][0])
         evaluation = OmniglotDataset('evaluation')
 
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
@@ -129,3 +129,5 @@ class TestSemanticClassifier(unittest.TestCase):
             fit_function=gradient_step,
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
+
+        print("params after train:", model.parameters[0][0])
