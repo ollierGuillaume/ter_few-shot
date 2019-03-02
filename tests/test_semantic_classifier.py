@@ -33,7 +33,7 @@ class TestSemanticClassifier(unittest.TestCase):
         k = 200
         n = 5
         lr = 0.01
-        epochs = 50
+        epochs = 10
         size_binary_layer = 30
         stochastic = True
         model_name = 'omniglot__n='+str(n)+'_k='+str(k)+'_epochs=500__lr=0.01__size_binary_layer='\
@@ -48,11 +48,13 @@ class TestSemanticClassifier(unittest.TestCase):
         torch.backends.cudnn.benchmark = True
 
         model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic)
+
+
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                       model_name+".pth")))
         for param in model.parameters():
             param.requires_grad = False
-
+        print("few param before training:", model.parameters[0][0])
         evaluation = OmniglotDataset('evaluation')
 
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
@@ -118,6 +120,7 @@ class TestSemanticClassifier(unittest.TestCase):
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
 
+        # print("few param after training:", model.parameters[0][0])
 
     def test_observ_layer(self):
         
