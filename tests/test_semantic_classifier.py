@@ -122,7 +122,6 @@ class TestSemanticClassifier(unittest.TestCase):
 
         for param in test_model.parameters():
             print("params test before train:", param[0])
-            break
 
         fit(
             test_model,
@@ -139,4 +138,3 @@ class TestSemanticClassifier(unittest.TestCase):
 
         for param in test_model.parameters():
             print("params after train:", param[0])
-            break
