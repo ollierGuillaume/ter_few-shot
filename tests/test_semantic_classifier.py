@@ -119,5 +119,5 @@ class TestSemanticClassifier(unittest.TestCase):
         )
 
 
-    def test_observ_layer(self):
+    #def test_observ_layer(self):
         
