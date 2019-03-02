@@ -30,23 +30,23 @@ class TestSemanticBinaryClassifier(nn.Module):
 
 class TestSemanticClassifier(unittest.TestCase):
     def test(self):
-        parser = argparse.ArgumentParser()
-
-        parser.add_argument('--n', default=1, type=int)
-        parser.add_argument('--k', default=100, type=int)
-        parser.add_argument('--lr', default=0.01, type=float)
-        parser.add_argument('--epochs', default=10, type=int)
-        parser.add_argument('--size-binary-layer', default=10, type=int)
-        parser.add_argument('--stochastic', action='store_true')
-
-        parser.add_argument('--epochs-test-model', default=10, type=int)
-        args = parser.parse_args()
-        k = args.k
-        n = args.n
-        lr = args.lr
-        epochs = args.epochs_test_model
-        size_binary_layer = args.size_binary_layer
-        stochastic = args.stochastic
+        # parser = argparse.ArgumentParser()
+        #
+        # parser.add_argument('--n', default=1, type=int)
+        # parser.add_argument('--k', default=100, type=int)
+        # parser.add_argument('--lr', default=0.01, type=float)
+        # parser.add_argument('--epochs', default=10, type=int)
+        # parser.add_argument('--size-binary-layer', default=10, type=int)
+        # parser.add_argument('--stochastic', action='store_true')
+        #
+        # parser.add_argument('--epochs-test-model', default=10, type=int)
+        # args = parser.parse_args()
+        k = 200
+        n = 5
+        lr = 0.01
+        epochs = 500
+        size_binary_layer = 30
+        stochastic = False
 
         model_name = 'omniglot__n='+str(n)+'_k='+str(k)+'_epochs='+str(args.epochs)+'__lr=0.01__size_binary_layer='\
                      +str(size_binary_layer)+('__stochastic' if stochastic else '__deterministic')
