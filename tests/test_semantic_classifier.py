@@ -120,7 +120,7 @@ class TestSemanticClassifier(unittest.TestCase):
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
 
-        # print("few param after training:", model.parameters[0][0])
+        print("few param after training:", model.parameters[0][0])
 
-    def test_observ_layer(self):
+    # def test_observ_layer(self):
         
