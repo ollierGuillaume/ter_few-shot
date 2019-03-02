@@ -29,7 +29,7 @@ class TestSemanticBinaryClassifier(nn.Module):
 
 
 class TestSemanticClassifier(unittest.TestCase):
-    def test_train_last_layer_other_classes(self):
+    def test(self):
         k = 200
         n = 5
         lr = 0.01
@@ -117,7 +117,3 @@ class TestSemanticClassifier(unittest.TestCase):
             fit_function=gradient_step,
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
-
-
-    #def test_observ_layer(self):
-        
