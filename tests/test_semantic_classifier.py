@@ -133,6 +133,6 @@ class TestSemanticClassifier(unittest.TestCase):
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
 
-        for param in model.parameters():
+        for param in test_model.parameters():
             print("params after train:", param[0])
             break
