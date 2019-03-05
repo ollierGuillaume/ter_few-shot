@@ -15,12 +15,14 @@ def hamming(x: torch.Tensor, n: int, k: int):
     for i in range(0, x.shape[0], n):
         classe_x = x[i:i+n]
         sum += torch.sum(torch.Tensor([[torch.sum(a != b) for a in classe_x] for b in classe_x]))/d_x
-    print("hamming",sum/k)
+
     return sum/k
 
 
 def semantic_loss(base_loss, n, k):
     def _loss(output, target, bin_x):
+        print("hamming::", hamming(bin_x, n, k))
+        print("base_loss::", base_loss(output, target))
         return base_loss(output, target) + hamming(bin_x, n, k)
     return _loss
 
