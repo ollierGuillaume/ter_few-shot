@@ -21,8 +21,6 @@ def hamming(x: torch.Tensor, n: int, k: int):
 
 def semantic_loss(base_loss, n, k, device):
     def _loss(output, target, bin_x):
-        print("hamming::", hamming(bin_x, n, k).to(device, dtype=torch.float64))
-        print("base_loss::", base_loss(output, target))
         return base_loss(output, target) + hamming(bin_x, n, k).to(device, dtype=torch.float64)
     return _loss
 
