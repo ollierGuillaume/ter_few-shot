@@ -19,11 +19,11 @@ def hamming(x: torch.Tensor, n: int, k: int):
     return sum/k
 
 
-def semantic_loss(base_loss, n, k):
+def semantic_loss(base_loss, n, k, device):
     def _loss(output, target, bin_x):
         # print("hamming::", hamming(bin_x, n, k))
         # print("base_loss::", base_loss(output, target))
-        return base_loss(output, target) + hamming(bin_x, n, k)
+        return base_loss(output, target) + hamming(bin_x, n, k).to(device)
     return _loss
 
 def gradient_step_semantic_encoder(model: Module, optimiser: Optimizer, semantic_loss: Callable, x: torch.Tensor, y: torch.Tensor, **kwargs):
