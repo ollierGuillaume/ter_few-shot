@@ -36,7 +36,7 @@ def gradient_step_semantic_encoder(model: Module, optimiser: Optimizer, semantic
     model.train()
     optimiser.zero_grad()
     y_pred, bin_layer = model(x)
-    loss = semantic_loss(y_pred, y, semantic_loss)
+    loss = semantic_loss(y_pred, y, bin_layer)
     loss.backward()
     optimiser.step()
 
