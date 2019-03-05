@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     loss_fn = nn.CrossEntropyLoss().to(device)
     if args.semantic_loss:
-        loss_fn = semantic_loss(loss_fn, args.n, args.k)
+        loss_fn = semantic_loss(loss_fn, args.n, args.k).to(device)
         gradient_step_fn = gradient_step_semantic_encoder
     else:
         gradient_step_fn = gradient_step
