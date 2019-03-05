@@ -21,7 +21,7 @@ def hamming(x: torch.Tensor, n: int, k: int):
 def semantic_loss(base_loss, n, k):
     def _loss(output, target, bin_x):
         return base_loss(output, target) + hamming(bin_x, n, k)
-
+    return _loss
 
 def gradient_step_semantic_encoder(model: Module, optimiser: Optimizer, semantic_loss: Callable, x: torch.Tensor, y: torch.Tensor, **kwargs):
     """Takes a single gradient step.
