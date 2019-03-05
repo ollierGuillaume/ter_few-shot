@@ -1,4 +1,7 @@
 import torch
+from torch.nn import Module
+from typing import Callable, List, Union
+from torch.optim import Optimizer
 
 def hamming(x: torch.Tensor, n: int, k: int):
     """Compute the mean of hamming distances between all samples of the same class in the set.
