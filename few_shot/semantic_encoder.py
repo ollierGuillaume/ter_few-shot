@@ -14,6 +14,7 @@ def hamming(x: torch.Tensor, n: int, k: int):
     sum = 0
     for i in range(0, x.shape[0], n):
         classe_x = x[i:i+n]
+        print("x::", classe_x)
         sum += torch.sum(torch.Tensor([[torch.sum(a != b) for a in classe_x] for b in classe_x]))/d_x
     return sum/k
 
