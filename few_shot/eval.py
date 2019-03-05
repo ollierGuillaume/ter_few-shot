@@ -31,13 +31,17 @@ def evaluate(model: Module, dataloader: DataLoader, prepare_batch: Callable, met
         for batch in dataloader:
             x, y = prepare_batch(batch)
             y_pred = model(x)
+            bin_layer = None
             if len(y_pred) == 2:
-                y_pred, _ = y_pred
+                y_pred, bin_layer = y_pred
 
             seen += x.shape[0]
 
             if loss_fn is not None:
-                totals['loss'] += loss_fn(y_pred, y).item() * x.shape[0]
+                if bin_layer is None:
+                    totals['loss'] += loss_fn(y_pred, y).item() * x.shape[0]
+                else:
+                    totals['loss'] += loss_fn(y_pred, y, bin_layer).item() * x.shape[0]
             for m in metrics:
                 if isinstance(m, str):
                     v = NAMED_METRICS[m](y, y_pred)
