@@ -1,6 +1,3 @@
-"""
-Reproduce Model-agnostic Meta-learning results (supervised only) of Finn et al
-"""
 from torch.utils.data import DataLoader
 from torch import nn
 import argparse
@@ -13,6 +10,7 @@ from few_shot.utils import setup_dirs
 from few_shot.train import fit, gradient_step
 from config import PATH
 import numpy as np
+from few_shot.semantic_encoder import *
 import matplotlib.pyplot as plt
 
 setup_dirs()
@@ -37,6 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--size-binary-layer', default=10, type=int)
     parser.add_argument('--stochastic', action='store_true')
     parser.add_argument('--intermediate-dense-layer', default=None, type=int)
+    parser.add_argument('--semantic-loss', action='store_true')
     # parser.add_argument('--eval-batches', default=20, type=int)
 
     # parser.add_argument('--inner-train-steps', default=1, type=int)
@@ -55,6 +54,12 @@ if __name__ == '__main__':
     else:
         raise (ValueError('Unsupported dataset'))
 
+    loss_fn = nn.CrossEntropyLoss().to(device)
+    if args.semantic_loss:
+        loss_fn = semantic_loss(loss_fn, args.n, args.k)
+        gradient_step_fn = gradient_step_semantic_encoder
+    else:
+        gradient_step_fn = gradient_step
     param_str = str(args.dataset) + '__n=' + str(args.n) + '_k=' + str(args.k) \
                 + '_epochs=' + str(args.epochs) + '__lr=' + str(args.lr) + '__size_binary_layer=' \
                 + str(args.size_binary_layer) \
@@ -104,7 +109,6 @@ if __name__ == '__main__':
                                      stochastic=args.stochastic,
                                      size_dense_layer_before_binary=args.intermediate_dense_layer).to(device, dtype=torch.double)
     optimiser = torch.optim.Adam(model.parameters(), lr=args.lr)
-    loss_fn = nn.CrossEntropyLoss().to(device)
 
 
     def prepare_batch(n, k):
@@ -150,6 +154,6 @@ if __name__ == '__main__':
         prepare_batch=prepare_batch(args.n, args.k),
         callbacks=callbacks,
         metrics=['categorical_accuracy'],
-        fit_function=gradient_step,
+        fit_function=gradient_step_fn,
         fit_function_kwargs={'n_shot': args.n, 'k_way': args.k, 'device': device},
     )

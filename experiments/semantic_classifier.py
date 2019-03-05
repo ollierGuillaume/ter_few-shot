@@ -1,6 +1,3 @@
-"""
-Reproduce Model-agnostic Meta-learning results (supervised only) of Finn et al
-"""
 from torch.utils.data import DataLoader
 from torch import nn
 import argparse
@@ -34,6 +31,9 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr', default=0.001, type=float)
     parser.add_argument('--batches', default=100, type=int)
+    parser.add_argument('--size-binary-layer', default=10, type=int)
+    parser.add_argument('--stochastic', action='store_true')
+    parser.add_argument('--intermediate-dense-layer', default=None, type=int)
     # parser.add_argument('--eval-batches', default=20, type=int)
 
     # parser.add_argument('--inner-train-steps', default=1, type=int)
@@ -52,8 +52,12 @@ if __name__ == '__main__':
     else:
         raise (ValueError('Unsupported dataset'))
 
-    param_str = str(args.dataset) + '__n=' + str(args.n) + '_k=' + str(args.k) + \
-                  '_epochs=' + str(args.epochs) + '__lr=' + str(args.lr)
+    param_str = str(args.dataset) + '__n=' + str(args.n) + '_k=' + str(args.k) \
+                + '_epochs=' + str(args.epochs) + '__lr=' + str(args.lr) + '__size_binary_layer=' \
+                + str(args.size_binary_layer) \
+                + ('__stochastic' if args.stochastic else '__deterministic') \
+                + ('__intermediate_dense_layer=' + str(args.intermediate_dense_layer) if args.intermediate_dense_layer
+                   is not None else "")
     #            f'train_steps={args.inner_train_steps}_val_steps={args.inner_val_steps}'
     print(param_str)
 
@@ -92,8 +96,10 @@ if __name__ == '__main__':
     # Training #
     ############
     print('Training semantic classifier on '+str(args.dataset)+'...')
-    model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size, size_binary_layer=10).to(device,
-                                                                                                         dtype=torch.double)
+    model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size,
+                                     size_binary_layer=args.size_binary_layer,
+                                     stochastic=args.stochastic,
+                                     size_dense_layer_before_binary=args.intermediate_dense_layer).to(device, dtype=torch.double)
     optimiser = torch.optim.Adam(model.parameters(), lr=args.lr)
     loss_fn = nn.CrossEntropyLoss().to(device)
 
