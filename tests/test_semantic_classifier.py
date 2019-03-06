@@ -14,7 +14,7 @@ from torch import nn
 import argparse
 import numpy as np
 import os
-
+import pandas as pd
 
 class TestSemanticBinaryClassifier(nn.Module):
     def __init__(self, k_way: int, semantic_model, size_binary_layer=10):
@@ -164,6 +164,7 @@ class TestSemanticClassifier(unittest.TestCase):
 
         model.eval()
 
+        pd.options.display.max_colwidth = 200
         with torch.no_grad():
             for batch_index, batch in enumerate(eval_dataloader):
                 x, y = batch
