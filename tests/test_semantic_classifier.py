@@ -148,10 +148,10 @@ class TestSemanticClassifier(unittest.TestCase):
         model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic)
         evaluation = OmniglotDataset('evaluation')
 
-        classes = np.random.choice(evaluation.df['class_id'].unique(), size=100)
+        classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
         for i in classes:
             evaluation.df[evaluation.df['class_id'] == i] = evaluation.df[evaluation.df['class_id'] == i].sample(frac=1)
-        df = evaluation.df[evaluation.df['class_id'].isin(classes)]
+        evaluation.df = evaluation.df[evaluation.df['class_id'].isin(classes)]
 
         validation_split = 0
 
