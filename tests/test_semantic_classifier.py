@@ -169,7 +169,6 @@ class TestSemanticClassifier(unittest.TestCase):
                 x = x.double().cuda()
                 _, bin_x = model(x)
                 print("bin x:", bin_x)
-                # for e in x:
-                    # plt.imshow(e.cpu().squeeze().numpy())
-                    # plt.show()
+                for i in classes:
+                    print(evaluation.df[evaluation.df['class_id'] == i][:n]['filepath'])
                 break
