@@ -161,6 +161,8 @@ class TestSemanticClassifier(unittest.TestCase):
                  batch_sampler=BasicSampler(evaluation, validation_split, True, classes, n=n),
                  num_workers=8
              )
+
+        model.eval()
         for batch_index, batch in enumerate(eval_dataloader):
             x, y = batch
             _, bin_x = model(x)
