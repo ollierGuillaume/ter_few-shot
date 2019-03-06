@@ -170,7 +170,7 @@ class TestSemanticClassifier(unittest.TestCase):
                 _, bin_x = model(x)
                 print("bin x:", bin_x)
 
-                for i in range(x.shape[0]):
+                for i in classes:
                     print("y i:", y[i])
-                    print(evaluation.df[evaluation.df['class_id'] == y[i]][i % n])
+                    print(evaluation.df[evaluation.df['class_id'] == i][:n]['filepath'])
                 break
