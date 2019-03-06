@@ -171,6 +171,5 @@ class TestSemanticClassifier(unittest.TestCase):
                 print("bin x:", bin_x)
 
                 for i in classes:
-                    print("y i:", y[i])
                     print(evaluation.df[evaluation.df['class_id'] == i][:n]['filepath'])
                 break
