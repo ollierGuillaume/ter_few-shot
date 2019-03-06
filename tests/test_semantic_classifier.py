@@ -163,10 +163,8 @@ class TestSemanticClassifier(unittest.TestCase):
              )
         for batch_index, batch in enumerate(eval_dataloader):
             x, y = batch
-
-            for e in x:
-                _, b = model(e)
-                print("binary::", b)
+            _, bin_x = model(x)
+            # for e in x:
                 # plt.imshow(e.cpu().squeeze().numpy())
                 # plt.show()
             break
