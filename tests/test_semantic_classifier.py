@@ -165,6 +165,7 @@ class TestSemanticClassifier(unittest.TestCase):
             x, y = batch
             x = x.double().cuda()
             #y = create_nshot_task_label(k, n).cuda()
+            print("x shape::", x.shape)
             print('x::', x)
             print('y::', y)
             # for e in x:
