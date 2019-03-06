@@ -45,12 +45,11 @@ class TestSemanticClassifier(unittest.TestCase):
         n = 5
         lr = 0.01
         epochs = 500
-        size_binary_layer = 30
+        size_binary_layer = 50
         stochastic = False
 
         model_name = 'omniglot__n='+str(n)+'_k='+str(k)+'_epochs='+str(epochs)+'__lr=0.01__size_binary_layer='\
                      +str(size_binary_layer)+('__stochastic' if stochastic else '__deterministic')
-        num_input_channels = 1
         validation_split = .2
 
         setup_dirs()
@@ -129,3 +128,36 @@ class TestSemanticClassifier(unittest.TestCase):
             fit_function=gradient_step,
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
+
+    def test_view_binary(self):
+        k = 200
+        n = 5
+        lr = 0.01
+        epochs = 500
+        size_binary_layer = 50
+        stochastic = False
+
+        model_name = 'omniglot__n=' + str(n) + '_k=' + str(k) + '_epochs=' + str(
+            epochs) + '__lr=0.01__size_binary_layer=' \
+                     + str(size_binary_layer) + ('__stochastic' if stochastic else '__deterministic')
+        setup_dirs()
+        assert torch.cuda.is_available()
+
+        device = torch.device('cuda')
+        torch.backends.cudnn.benchmark = True
+
+        model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic)
+        evaluation = OmniglotDataset('evaluation')
+
+        classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
+        for i in classes:
+            evaluation.df[evaluation.df['class_id'] == i] = evaluation.df[evaluation.df['class_id'] == i].sample(frac=1)
+        df = evaluation.df[evaluation.df['class_id'].isin(classes)]
+
+        batch = []
+        for k in classes:
+            data_class = df[df['class_id'] == k]
+            features = data_class[0:n]
+            print("features:", features)
+
+
