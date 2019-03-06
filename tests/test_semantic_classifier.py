@@ -172,3 +172,4 @@ class TestSemanticClassifier(unittest.TestCase):
 
                 for i in range(x.shape[0]):
                     print(evaluation.df[evaluation.df['class_id'] == y[i]][i % n])
+                break
