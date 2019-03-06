@@ -171,3 +171,4 @@ class TestSemanticClassifier(unittest.TestCase):
             # for e in x:
             #     plt.imshow(e.cpu().squeeze().numpy())
             #     plt.show()
+            break

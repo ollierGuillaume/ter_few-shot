@@ -97,10 +97,8 @@ class BasicSampler(Sampler):
 
         self.is_train = is_train
         self.validation_split = validation_split
-        print("n_batch::", self.n_batch, len(self.df[self.df['class_id'] == self.classes[0]]))
 
     def __iter__(self):
-        print("iter")
 
         if self.is_train:
             self.i_batch = 0
