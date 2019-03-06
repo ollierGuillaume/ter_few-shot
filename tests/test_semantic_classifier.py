@@ -145,7 +145,7 @@ class TestSemanticClassifier(unittest.TestCase):
         device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
 
-        model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic)
+        model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic).to(device, dtype=torch.double)
         evaluation = OmniglotDataset('evaluation')
 
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=20)
