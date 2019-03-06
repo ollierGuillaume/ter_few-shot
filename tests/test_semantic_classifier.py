@@ -168,7 +168,8 @@ class TestSemanticClassifier(unittest.TestCase):
                 print("x shape:", x.shape)
                 x = x.double().cuda()
                 _, bin_x = model(x)
-                #print("bin x:", bin_x)
+                print("x:",x)
+                print("bin x:", bin_x)
 
                 i = 0
                 print(bin_x)
