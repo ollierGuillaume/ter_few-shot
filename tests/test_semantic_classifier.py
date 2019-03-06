@@ -151,7 +151,6 @@ class TestSemanticClassifier(unittest.TestCase):
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
         for i in classes:
             evaluation.df[evaluation.df['class_id'] == i] = evaluation.df[evaluation.df['class_id'] == i].sample(frac=1)
-        evaluation.df = evaluation.df[evaluation.df['class_id'].isin(classes)]
 
         validation_split = 0
 
@@ -164,6 +163,7 @@ class TestSemanticClassifier(unittest.TestCase):
         model.eval()
         for batch_index, batch in enumerate(eval_dataloader):
             x, y = batch
+            print("x shape:", x.shape)
             x = x.double().cuda()
             print("type x:", type(x))
             _, bin_x = model(x)
