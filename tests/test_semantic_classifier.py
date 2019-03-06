@@ -159,5 +159,7 @@ class TestSemanticClassifier(unittest.TestCase):
             data_class = df[df['class_id'] == k]
             features = data_class[0:n]
             print("features:", features)
-
+            for i, s in features.iterrows():
+                batch.append(s['id'])
+            print("batch::", batch)
 
