@@ -133,7 +133,7 @@ class TestSemanticClassifier(unittest.TestCase):
         k = 200
         n = 5
         epochs = 500
-        size_binary_layer = 50
+        size_binary_layer = 30
         stochastic = False
 
         model_name = 'omniglot__n=' + str(n) + '_k=' + str(k) + '_epochs=' + str(
@@ -169,6 +169,11 @@ class TestSemanticClassifier(unittest.TestCase):
                 x = x.double().cuda()
                 _, bin_x = model(x)
                 print("bin x:", bin_x)
-                for i in classes:
-                    print(evaluation.df[evaluation.df['class_id'] == i][:n]['filepath'])
+
+                i = 0
+                for classe in classes:
+                    for j in range(n):
+                        print(evaluation.df[evaluation.df['class_id'] == classe][j]['filepath'])
+                        print(bin_x[i])
+                        i += 1
                 break
