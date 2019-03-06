@@ -176,7 +176,7 @@ class TestSemanticClassifier(unittest.TestCase):
                 i = 0
                 print(bin_x)
                 for classe in classes:
-                    print(evaluation.df[evaluation.df['class_id'] == classe]['filepath'][:n])
+                    print(evaluation.df[evaluation.df['class_id'] == classe]['filepath'][:n].to_string())
                     for j in range(n):
                         print(bin_x[i][3])
                         i += 1
