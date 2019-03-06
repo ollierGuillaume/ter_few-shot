@@ -132,7 +132,6 @@ class TestSemanticClassifier(unittest.TestCase):
     def test_view_binary(self):
         k = 200
         n = 5
-        lr = 0.01
         epochs = 500
         size_binary_layer = 50
         stochastic = False
@@ -149,7 +148,7 @@ class TestSemanticClassifier(unittest.TestCase):
         model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic)
         evaluation = OmniglotDataset('evaluation')
 
-        classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
+        classes = np.random.choice(evaluation.df['class_id'].unique(), size=100)
         for i in classes:
             evaluation.df[evaluation.df['class_id'] == i] = evaluation.df[evaluation.df['class_id'] == i].sample(frac=1)
         df = evaluation.df[evaluation.df['class_id'].isin(classes)]
