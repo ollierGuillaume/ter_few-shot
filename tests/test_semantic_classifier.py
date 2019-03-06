@@ -163,11 +163,13 @@ class TestSemanticClassifier(unittest.TestCase):
              )
         for batch_index, batch in enumerate(eval_dataloader):
             x, y = batch
-            x = x.double().cuda()
+            # x = x.double().cuda()
             #y = create_nshot_task_label(k, n).cuda()
-            print("x shape::", x.shape)
+
             print('x::', x)
             print('y::', y)
-            # for e in x:
+            for e in x:
+                print("x shape::", e.shape)
+                break
             #     plt.imshow(e.cpu().squeeze().numpy())
             #     plt.show()
