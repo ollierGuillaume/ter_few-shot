@@ -161,7 +161,7 @@ class TestSemanticClassifier(unittest.TestCase):
              )
 
         model.eval()
-        print("eval::", len(evaluation.df))
+
         with torch.no_grad():
             for batch_index, batch in enumerate(eval_dataloader):
                 x, y = batch
@@ -169,6 +169,6 @@ class TestSemanticClassifier(unittest.TestCase):
                 x = x.double().cuda()
                 _, bin_x = model(x)
                 print("bin x:", bin_x)
-                # for e in x:
-                    # plt.imshow(e.cpu().squeeze().numpy())
-                    # plt.show()
+
+                for i in range(x.shape[0]):
+                    print(evaluation.df[evaluation.df['class_id'] == y[i]][i % n])
