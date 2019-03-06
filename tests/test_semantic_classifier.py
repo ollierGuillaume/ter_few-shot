@@ -168,12 +168,12 @@ class TestSemanticClassifier(unittest.TestCase):
                 print("x shape:", x.shape)
                 x = x.double().cuda()
                 _, bin_x = model(x)
-                print("bin x:", bin_x)
+                #print("bin x:", bin_x)
 
                 i = 0
                 for classe in classes:
                     for j in range(n):
-                        print(evaluation.df[evaluation.df['class_id'] == classe]['filepath'][j])
+                        print(evaluation.df[evaluation.df['class_id'] == classe][j:j]['filepath'])
                         print(bin_x[i])
                         i += 1
                 break
