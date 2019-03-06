@@ -154,12 +154,19 @@ class TestSemanticClassifier(unittest.TestCase):
             evaluation.df[evaluation.df['class_id'] == i] = evaluation.df[evaluation.df['class_id'] == i].sample(frac=1)
         df = evaluation.df[evaluation.df['class_id'].isin(classes)]
 
-        batch = []
-        for k in classes:
-            data_class = df[df['class_id'] == k]
-            features = data_class[0:n]
-            print("features:", features)
-            for i, s in features.iterrows():
-                batch.append(s['id'])
-            print("batch::", batch)
+        validation_split = 0
 
+        eval_dataloader = DataLoader(
+                 evaluation,
+                 batch_sampler=BasicSampler(evaluation, validation_split, True, classes, n=n),
+                 num_workers=8
+             )
+        for batch_index, batch in enumerate(eval_dataloader):
+            x, y = batch
+            x = x.double().cuda()
+            y = create_nshot_task_label(k, n).cuda()
+            print('x::', x)
+            print('y::', y)
+            # for e in x:
+            #     plt.imshow(e.cpu().squeeze().numpy())
+            #     plt.show()
