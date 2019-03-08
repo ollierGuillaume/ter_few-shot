@@ -375,21 +375,27 @@ class StochasticBinaryActivation(nn.Module):
 
 class SemanticBinaryClassifier(nn.Module):
     def __init__(self, num_input_channels: int, k_way: int, final_layer_size: int = 64,
-                 size_dense_layer_before_binary:int =None, size_binary_layer=10, stochastic: bool=True):
+                 size_dense_layer_before_binary:int =None, size_binary_layer=10, stochastic: bool=True,
+                 n_conv_layers:int = 4):
         """
         # Arguments:
             num_input_channels: Number of color channels the model expects input data to contain. Omniglot = 1,
                 miniImageNet = 3
             k_way: Number of classes the model will discriminate between
             final_layer_size: 64 for Omniglot, 1600 for miniImageNet
-            size_binary_layer: Number of neurons in the last hidden layer
-            (with binary activation)
+            size_binary_layer: Number of neurons in the last hidden layer (with binary activation)
+            size_dense_layer_before_binary: if not None, add a dense layer of this size before the last binary layer
+            n_conv_layers: number of convolutional layers, must be on [1-4]
         """
         super(SemanticBinaryClassifier, self).__init__()
+
         self.conv1 = conv_block(num_input_channels, 64)
-        self.conv2 = conv_block(64, 64)
-        self.conv3 = conv_block(64, 64)
-        self.conv4 = conv_block(64, 64)
+        if n_conv_layers >= 2:
+            self.conv2 = conv_block(64, 64)
+        if n_conv_layers >= 3:
+            self.conv3 = conv_block(64, 64)
+        if n_conv_layers >= 4:
+            self.conv4 = conv_block(64, 64)
 
         if size_dense_layer_before_binary is not None:
             self.dense1 = nn.Linear(final_layer_size, size_dense_layer_before_binary)

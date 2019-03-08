@@ -35,6 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--size-binary-layer', default=10, type=int)
     parser.add_argument('--stochastic', action='store_true')
     parser.add_argument('--intermediate-dense-layer', default=None, type=int)
+    parser.add_argument('--n_conv_layers', default=4, type=int)
     parser.add_argument('--semantic-loss', action='store_true')
     # parser.add_argument('--eval-batches', default=20, type=int)
 
@@ -65,7 +66,8 @@ if __name__ == '__main__':
                 + str(args.size_binary_layer) \
                 + ('__stochastic' if args.stochastic else '__deterministic') \
                 + ('__intermediate_dense_layer=' + str(args.intermediate_dense_layer) if args.intermediate_dense_layer
-                   is not None else "")
+                   is not None else "")\
+                + ('__n_conv_layers=' + str(args.n_conv_layers) if args.n_conv_layers != 4 else "")
     #            f'train_steps={args.inner_train_steps}_val_steps={args.inner_val_steps}'
     print(param_str)
 
@@ -107,7 +109,8 @@ if __name__ == '__main__':
     model = SemanticBinaryClassifier(num_input_channels, args.k, fc_layer_size,
                                      size_binary_layer=args.size_binary_layer,
                                      stochastic=args.stochastic,
-                                     size_dense_layer_before_binary=args.intermediate_dense_layer).to(device, dtype=torch.double)
+                                     size_dense_layer_before_binary=args.intermediate_dense_layer,
+                                     n_conv_layers=args.n_conv_layers).to(device, dtype=torch.double)
     optimiser = torch.optim.Adam(model.parameters(), lr=args.lr)
 
 
