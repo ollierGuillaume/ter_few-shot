@@ -390,18 +390,23 @@ class SemanticBinaryClassifier(nn.Module):
         super(SemanticBinaryClassifier, self).__init__()
 
         self.conv1 = conv_block(num_input_channels, 64)
+        n = 12544
+        #TODO adapt calcul n
         if n_conv_layers >= 2:
             self.conv2 = conv_block(64, 64)
+            n = 3136
         if n_conv_layers >= 3:
             self.conv3 = conv_block(64, 64)
+            n = 576
         if n_conv_layers >= 4:
             self.conv4 = conv_block(64, 64)
-
+            n = 64
+        #print("size::", self.conv3.size())
         if size_dense_layer_before_binary is not None:
-            self.dense1 = nn.Linear(final_layer_size, size_dense_layer_before_binary)
+            self.dense1 = nn.Linear(n, size_dense_layer_before_binary)
             self.dense2 = nn.Linear(size_dense_layer_before_binary, size_binary_layer)
         else:
-            self.dense2 = nn.Linear(final_layer_size, size_binary_layer)
+            self.dense2 = nn.Linear(n, size_binary_layer)
 
         if stochastic:
             self.binary_act = StochasticBinaryActivation(estimator='ST')
