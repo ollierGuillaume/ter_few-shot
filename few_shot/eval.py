@@ -41,7 +41,8 @@ def evaluate(model: Module, dataloader: DataLoader, prepare_batch: Callable, met
                 if bin_layer is None:
                     totals['loss'] += loss_fn(y_pred, y).item() * x.shape[0]
                 else:
-                    totals['loss'] += loss_fn(y_pred, y, bin_layer).item() * x.shape[0]
+                    totals['loss'] += loss_fn(y_pred, y).item() * x.shape[0]
+                    # totals['loss'] += loss_fn(y_pred, y, bin_layer).item() * x.shape[0]
             for m in metrics:
                 if isinstance(m, str):
                     v = NAMED_METRICS[m](y, y_pred)
