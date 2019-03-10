@@ -390,12 +390,12 @@ class SemanticBinaryClassifier(nn.Module):
         super(SemanticBinaryClassifier, self).__init__()
 
         self.conv1 = conv_block(num_input_channels, 64)
-        if n_conv_layers >= 2:
-            self.conv2 = conv_block(64, 64)
-        if n_conv_layers >= 3:
-            self.conv3 = conv_block(64, 64)
-        if n_conv_layers >= 4:
-            self.conv4 = conv_block(64, 64)
+        #if n_conv_layers >= 2:
+        self.conv2 = conv_block(64, 64)
+        #if n_conv_layers >= 3:
+        self.conv3 = conv_block(64, 64)
+        #if n_conv_layers >= 4:
+        self.conv4 = conv_block(64, 64)
 
         if size_dense_layer_before_binary is not None:
             self.dense1 = nn.Linear(final_layer_size, size_dense_layer_before_binary)
