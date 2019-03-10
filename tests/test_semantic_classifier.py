@@ -41,17 +41,17 @@ class TestSemanticClassification(unittest.TestCase):
         #
         # parser.add_argument('--epochs-test-model', default=10, type=int)
         # args = parser.parse_args()
-        k = 200
+        k = 100
         n = 5
         lr = 0.01
         epochs = 500
-        size_binary_layer = 50
+        size_binary_layer = 30
         stochastic = False
-        n_conv_layers = 3
+        n_conv_layers = 2
 
         model_name = 'omniglot__n='+str(n)+'_k='+str(k)+'_epochs='+str(epochs)+'__lr=0.01__size_binary_layer='\
                      +str(size_binary_layer)+('__stochastic' if stochastic else '__deterministic')\
-                     + ('__n_conv_layers=' + str(n_conv_layers) if gitn_conv_layers != 4 else "")
+                     + ('__n_conv_layers=' + str(n_conv_layers) if n_conv_layers != 4 else "")
         validation_split = .2
 
         setup_dirs()
@@ -60,7 +60,9 @@ class TestSemanticClassification(unittest.TestCase):
         device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
 
-        model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic)
+        model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic,
+                                         size_dense_layer_before_binary=None,
+                                         n_conv_layers=n_conv_layers)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                       model_name+".pth")))
         for param in model.parameters():
@@ -131,56 +133,56 @@ class TestSemanticClassification(unittest.TestCase):
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
 
-    def test_view_binary(self):
-        k = 200
-        n = 5
-        epochs = 500
-        size_binary_layer = 30
-        stochastic = False
-
-        model_name = 'omniglot__n=' + str(n) + '_k=' + str(k) + '_epochs=' + str(
-            epochs) + '__lr=0.01__size_binary_layer=' \
-                     + str(size_binary_layer) + ('__stochastic' if stochastic else '__deterministic')
-        setup_dirs()
-        assert torch.cuda.is_available()
-
-        device = torch.device('cuda')
-        torch.backends.cudnn.benchmark = True
-
-        model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic).to(device, dtype=torch.double)
-
-        model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier", model_name+".pth")))
-        evaluation = OmniglotDataset('evaluation')
-
-        classes = np.random.choice(evaluation.df['class_id'].unique(), size=20)
-        for i in classes:
-            evaluation.df[evaluation.df['class_id'] == i] = evaluation.df[evaluation.df['class_id'] == i].sample(frac=1)
-
-        validation_split = 0
-
-        eval_dataloader = DataLoader(
-                 evaluation,
-                 batch_sampler=BasicSampler(evaluation, validation_split, True, classes, n=5),
-                 num_workers=8
-             )
-
-        model.eval()
-
-        pd.options.display.max_colwidth = 200
-        with torch.no_grad():
-            for batch_index, batch in enumerate(eval_dataloader):
-                x, y = batch
-                print("x shape:", x.shape)
-                x = x.double().cuda()
-                _, bin_x = model(x)
-                # print("x:",x)
-                # print("bin x:", bin_x)
-
-                i = 0
-                print(bin_x)
-                for classe in classes:
-                    print(evaluation.df[evaluation.df['class_id'] == classe]['filepath'][:n].to_string())
-                    for j in range(n):
-                        print(bin_x[i][3])
-                        i += 1
-                break
+    # def test_view_binary(self):
+    #     k = 200
+    #     n = 5
+    #     epochs = 500
+    #     size_binary_layer = 30
+    #     stochastic = False
+    #
+    #     model_name = 'omniglot__n=' + str(n) + '_k=' + str(k) + '_epochs=' + str(
+    #         epochs) + '__lr=0.01__size_binary_layer=' \
+    #                  + str(size_binary_layer) + ('__stochastic' if stochastic else '__deterministic')
+    #     setup_dirs()
+    #     assert torch.cuda.is_available()
+    #
+    #     device = torch.device('cuda')
+    #     torch.backends.cudnn.benchmark = True
+    #
+    #     model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic).to(device, dtype=torch.double)
+    #
+    #     model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier", model_name+".pth")))
+    #     evaluation = OmniglotDataset('evaluation')
+    #
+    #     classes = np.random.choice(evaluation.df['class_id'].unique(), size=20)
+    #     for i in classes:
+    #         evaluation.df[evaluation.df['class_id'] == i] = evaluation.df[evaluation.df['class_id'] == i].sample(frac=1)
+    #
+    #     validation_split = 0
+    #
+    #     eval_dataloader = DataLoader(
+    #              evaluation,
+    #              batch_sampler=BasicSampler(evaluation, validation_split, True, classes, n=5),
+    #              num_workers=8
+    #          )
+    #
+    #     model.eval()
+    #
+    #     pd.options.display.max_colwidth = 200
+    #     with torch.no_grad():
+    #         for batch_index, batch in enumerate(eval_dataloader):
+    #             x, y = batch
+    #             print("x shape:", x.shape)
+    #             x = x.double().cuda()
+    #             _, bin_x = model(x)
+    #             # print("x:",x)
+    #             # print("bin x:", bin_x)
+    #
+    #             i = 0
+    #             print(bin_x)
+    #             for classe in classes:
+    #                 print(evaluation.df[evaluation.df['class_id'] == classe]['filepath'][:n].to_string())
+    #                 for j in range(n):
+    #                     print(bin_x[i][3])
+    #                     i += 1
+    #             break
