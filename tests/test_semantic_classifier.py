@@ -252,6 +252,7 @@ class TestSemanticClassification(unittest.TestCase):
         tensor = layer1.weight.data.cpu().squeeze().numpy()
 
         for i in range(64):
+            print("save img")
             plt.imsave(str(i)+'fig/fig_test.png', tensor[i], cmap='gray')
 
         fit(
