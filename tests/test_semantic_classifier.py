@@ -250,6 +250,7 @@ class TestSemanticClassification(unittest.TestCase):
         body_model = [i for i in model.children()][0]
         layer1 = body_model[0]
         tensor = layer1.weight.data.cpu().squeeze().numpy()
+
         for i in range(64):
             plt.imshow(tensor[i], cmap='gray')
             plt.show()
