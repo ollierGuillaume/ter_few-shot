@@ -189,26 +189,13 @@ class TestSemanticClassification(unittest.TestCase):
 
     def test_view_conv(self):
         n = 5
-        k = 200
+        k = 5
 
         setup_dirs()
         assert torch.cuda.is_available()
 
         device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
-
-
-
-
-        body_model = [i for i in model.children()][0]
-        layer1 = body_model[0]
-        tensor = layer1.weight.data.cpu().squeeze().numpy()
-
-        for i in range(64):
-            print("save img")
-            plt.imsave(str(i) + 'fig/fig_test.png', tensor[i], cmap='gray')
-
-
 
         model = FewShotClassifier(1, k).to(device, dtype=torch.double)
         background = OmniglotDataset('background')
@@ -259,6 +246,14 @@ class TestSemanticClassification(unittest.TestCase):
 
             ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
         ]
+
+        body_model = [i for i in model.children()][0]
+        layer1 = body_model[0]
+        tensor = layer1.weight.data.cpu().squeeze().numpy()
+
+        for i in range(64):
+            print("save img")
+            plt.imsave(str(i)+'fig/fig_test.png', tensor[i], cmap='gray')
 
         fit(
             model,
