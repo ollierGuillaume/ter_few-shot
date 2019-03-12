@@ -43,7 +43,7 @@ class GlobalAvgPool2d(nn.Module):
         return nn.functional.avg_pool2d(input, kernel_size=input.size()[2:]).view(-1, input.size(1))
 
 
-def conv_block(in_channels: int, out_channels: int) -> nn.Module:
+def conv_block(in_channels: int, out_channels: int, conv_size=3) -> nn.Module:
     """Returns a Module that performs 3x3 convolution, ReLu activation, 2x2 max pooling.
 
     # Arguments
@@ -51,7 +51,7 @@ def conv_block(in_channels: int, out_channels: int) -> nn.Module:
         out_channels:
     """
     return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, 3, padding=1),
+        nn.Conv2d(in_channels, out_channels, conv_size, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
         nn.MaxPool2d(kernel_size=2, stride=2)
@@ -109,7 +109,7 @@ class FewShotClassifier(nn.Module):
             final_layer_size: 64 for Omniglot, 1600 for miniImageNet
         """
         super(FewShotClassifier, self).__init__()
-        self.conv1 = conv_block(num_input_channels, 64)
+        self.conv1 = conv_block(num_input_channels, 64, 10)
         self.conv2 = conv_block(64, 64)
         self.conv3 = conv_block(64, 64)
         self.conv4 = conv_block(64, 64)

@@ -23,6 +23,7 @@ def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: tor
         x: Input samples
         y: Input targets
     """
+    max_batch = 100
     model.train()
     optimiser.zero_grad()
     y_pred = model(x)
