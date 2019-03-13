@@ -23,7 +23,7 @@ def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: tor
         x: Input samples
         y: Input targets
     """
-    max_batch = 300
+    max_batch = 100
     losses = []
     predictions = []
     for i in range(0, y.shape[0], max_batch):
