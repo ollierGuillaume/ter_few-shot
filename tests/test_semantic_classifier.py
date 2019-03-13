@@ -189,7 +189,7 @@ class TestSemanticClassification(unittest.TestCase):
 
     def test_view_conv(self):
         n = 5
-        k = 5
+        k = 250
 
         setup_dirs()
         assert torch.cuda.is_available()
@@ -243,23 +243,19 @@ class TestSemanticClassification(unittest.TestCase):
         callbacks = [
             evalmetrics,
             progressbar,
-
+            ModelCheckpoint(
+                            filepath=os.path.join(PATH, 'models', 'semantic_classifier', 'test1.pth'),
+                            monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
+                        ),
             ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
         ]
 
-        body_model = [i for i in model.children()][0]
-        layer1 = body_model[0]
-        tensor = layer1.weight.data.cpu().squeeze().numpy()
-
-        for i in range(64):
-            print("save img")
-            plt.imsave(str(i)+'fig/fig_test.png', tensor[i], cmap='gray')
 
         fit(
             model,
             optimiser,
             loss_fn,
-            epochs=30,
+            epochs=50,
             dataloader=train_dataloader,
             prepare_batch=prepare_batch(n, k),
             callbacks=callbacks,
@@ -268,9 +264,9 @@ class TestSemanticClassification(unittest.TestCase):
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
 
-        body_model = [i for i in model.children()][0]
-        layer1 = body_model[0]
-        tensor = layer1.weight.data.cpu().squeeze().numpy()
-        for i in range(64):
-            plt.imshow(tensor[i], cmap='gray')
-            plt.show()
+        # body_model = [i for i in model.children()][0]
+        # layer1 = body_model[0]
+        # tensor = layer1.weight.data.cpu().squeeze().numpy()
+        # for i in range(64):
+        #     plt.imshow(tensor[i], cmap='gray')
+        #     plt.show()

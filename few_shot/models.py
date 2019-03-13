@@ -109,7 +109,7 @@ class FewShotClassifier(nn.Module):
             final_layer_size: 64 for Omniglot, 1600 for miniImageNet
         """
         super(FewShotClassifier, self).__init__()
-        self.conv1 = conv_block(num_input_channels, 64, 10)
+        self.conv1 = conv_block(num_input_channels, 64)
         self.conv2 = conv_block(64, 64)
         self.conv3 = conv_block(64, 64)
         self.conv4 = conv_block(64, 64)
