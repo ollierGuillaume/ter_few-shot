@@ -118,6 +118,7 @@ class FewShotClassifier(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
+        print("conv1 shape:", x.shape)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
@@ -139,6 +140,13 @@ class FewShotClassifier(nn.Module):
 
         return x
 
+    def view(self, x):
+        x1 = self.conv1(x)
+        x2 = self.conv2(x1)
+        x3 = self.conv3(x2)
+        x4 = self.conv4(x3)
+
+        return x1, x2, x3, x4
 
 class MatchingNetwork(nn.Module):
     def __init__(self, n: int, k: int, q: int, fce: bool, num_input_channels: int,

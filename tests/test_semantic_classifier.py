@@ -194,7 +194,7 @@ class TestSemanticClassification(unittest.TestCase):
         setup_dirs()
         assert torch.cuda.is_available()
 
-        device = torch.device('cuda')
+        device = torch.device('cuda:1')
         torch.backends.cudnn.benchmark = True
 
         model = FewShotClassifier(1, k).to(device, dtype=torch.double)
@@ -270,3 +270,33 @@ class TestSemanticClassification(unittest.TestCase):
         # for i in range(64):
         #     plt.imshow(tensor[i], cmap='gray')
         #     plt.show()
+
+        # model.eval()
+        #
+        # pd.options.display.max_colwidth = 200
+        # with torch.no_grad():
+        #     for batch_index, batch in enumerate(eval_dataloader):
+        #         x, y = batch
+        #         x = x.double().cuda()
+        #         x1, x2, x3, x4 = model.view(x)
+        #         print("x:", x1.shape)
+        #         # print("bin x:", bin_x)
+        #
+        #         dic_filters_activations = []
+        #         for _ in range(4):
+        #             layer = []
+        #             for _ in range(64):
+        #                 layer.append({})
+        #             dic_filters_activations.append(layer)
+        #
+        #         i = 0
+        #         for classe in classes:
+        #             for j in range(n):
+        #                 feat_x = x1[i]
+        #                 background.df[background.df['class_id'] == classe]['filepath'][:n].to_string()
+        #                 for layer in range(4):
+        #                     for filter in range(64):
+        #                         out_filter = feat_x[filter]
+        #                         max_activation = torch.max(out_filter).item()
+        #                         dic_filters_activations[layer][filter][name] = max_activation
+        #                 i += 1
