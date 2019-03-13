@@ -188,8 +188,8 @@ class TestSemanticClassification(unittest.TestCase):
     #             break
 
     def test_view_conv(self):
-        n = 5
-        k = 250
+        n = 20
+        k = 800
 
         setup_dirs()
         assert torch.cuda.is_available()
