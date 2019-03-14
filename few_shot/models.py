@@ -118,7 +118,7 @@ class FewShotClassifier(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        print("conv1 shape:", x.shape)
+        # print("conv1 shape:", x.shape)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
