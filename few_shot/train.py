@@ -13,9 +13,37 @@ from few_shot.callbacks import DefaultCallback, ProgressBarLogger, CallbackList,
 from few_shot.metrics import NAMED_METRICS
 
 
+# def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: torch.Tensor, y: torch.Tensor, **kwargs):
+#     """Takes a single gradient step.
+#
+#     # Arguments
+#         model: Model to be fitted
+#         optimiser: Optimiser to calculate gradient step from loss
+#         loss_fn: Loss function to calculate between predictions and outputs
+#         x: Input samples
+#         y: Input targets
+#     """
+#     max_batch = 300
+#     losses = []
+#     predictions = []
+#     for i in range(0, y.shape[0], max_batch):
+#         y_sub_batch = y[i:i+max_batch]
+#         x_sub_batch = x[i:i+max_batch]
+#         model.train()
+#         optimiser.zero_grad()
+#         y_pred = model(x_sub_batch)
+#         if len(y_pred) == 2:
+#             y_pred, _ = y_pred
+#         loss = loss_fn(y_pred, y_sub_batch)
+#         loss.backward()
+#         optimiser.step()
+#         losses.append(loss)
+#         predictions.append(y_pred)
+#
+#     return torch.stack(losses).mean(), torch.cat(predictions)
+
 def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: torch.Tensor, y: torch.Tensor, **kwargs):
     """Takes a single gradient step.
-
     # Arguments
         model: Model to be fitted
         optimiser: Optimiser to calculate gradient step from loss
@@ -23,24 +51,16 @@ def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: tor
         x: Input samples
         y: Input targets
     """
-    max_batch = 300
-    losses = []
-    predictions = []
-    for i in range(0, y.shape[0], max_batch):
-        y_sub_batch = y[i:i+max_batch]
-        x_sub_batch = x[i:i+max_batch]
-        model.train()
-        optimiser.zero_grad()
-        y_pred = model(x_sub_batch)
-        if len(y_pred) == 2:
-            y_pred, _ = y_pred
-        loss = loss_fn(y_pred, y_sub_batch)
-        loss.backward()
-        optimiser.step()
-        losses.append(loss)
-        predictions.append(y_pred)
+    model.train()
+    optimiser.zero_grad()
+    y_pred = model(x)
+    if len(y_pred) == 2:
+        y_pred, _ = y_pred
+    loss = loss_fn(y_pred, y)
+    loss.backward()
+    optimiser.step()
 
-    return torch.stack(losses).mean(), torch.cat(predictions)
+    return loss, y_pred
 
 
 def batch_metrics(model: Module, y_pred: torch.Tensor, y: torch.Tensor, metrics: List[Union[str, Callable]],
