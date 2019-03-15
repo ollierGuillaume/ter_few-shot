@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
+from shutil import copyfile
 
 class TestSemanticBinaryClassifier(nn.Module):
     def __init__(self, k_way: int, semantic_model, size_binary_layer=10):
@@ -194,7 +195,7 @@ class TestSemanticClassification(unittest.TestCase):
         setup_dirs()
         assert torch.cuda.is_available()
 
-        device = torch.device('cuda:1')
+        device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
 
         model = FewShotClassifier(1, k).to(device, dtype=torch.double)
@@ -211,12 +212,10 @@ class TestSemanticClassification(unittest.TestCase):
         )
 
         eval_dataloader = DataLoader(
-                         background,
-                         batch_sampler=BasicSampler(background, 0.2, False, classes, n=n),
-                         num_workers=8
-                     )
-
-        optimiser = torch.optim.Adam(model.parameters(), lr=0.01)
+            background,
+            batch_sampler=BasicSampler(background, 0.2, False, classes, n=n),
+            num_workers=8
+        )
 
         def prepare_batch(n, k):
             def prepare_batch_(batch):
@@ -231,25 +230,27 @@ class TestSemanticClassification(unittest.TestCase):
 
             return prepare_batch_
 
+        optimiser = torch.optim.Adam(model.parameters(), lr=0.01)
         loss_fn = nn.CrossEntropyLoss().to(device)
-        progressbar = ProgressBarLogger()
-        progressbar.set_params({'num_batches': k * n, 'metrics': ['categorical_accuracy'], 'loss': loss_fn,
-                                'verbose': 1})
+
         evalmetrics = EvaluateMetrics(eval_dataloader)
         evalmetrics.set_params({'metrics': ['categorical_accuracy'],
                                 'prepare_batch': prepare_batch(n, k),
                                 'loss_fn': loss_fn})
-
+        progressbar = ProgressBarLogger()
+        progressbar.set_params({'num_batches': k * n, 'metrics': ['categorical_accuracy'], 'loss': loss_fn,
+                                'verbose': 1})
         callbacks = [
             evalmetrics,
             progressbar,
-            ModelCheckpoint(
-                            filepath=os.path.join(PATH, 'models', 'semantic_classifier', 'test1.pth'),
-                            monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
-                        ),
-            ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
-        ]
 
+            ModelCheckpoint(
+                filepath=os.path.join(PATH, 'models', 'semantic_classifier', 'test2.pth'),
+                monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
+            ),
+            ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
+            CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', 'test2.csv'))
+        ]
 
         fit(
             model,
@@ -264,39 +265,56 @@ class TestSemanticClassification(unittest.TestCase):
             fit_function_kwargs={'n_shot': n, 'k_way': k, 'device': device},
         )
 
+        # model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier", "test1.pth")))
         # body_model = [i for i in model.children()][0]
         # layer1 = body_model[0]
-        # tensor = layer1.weight.data.cpu().squeeze().numpy()
-        # for i in range(64):
-        #     plt.imshow(tensor[i], cmap='gray')
-        #     plt.show()
-
+        # #tensor = layer1.weight.data.cpu().squeeze().numpy()
+        # # for i in range(64):
+        # #     plt.imshow(tensor[i], cmap='gray')
+        # #     plt.show()
+        #
         # model.eval()
         #
         # pd.options.display.max_colwidth = 200
+        #
+        # dic_filters_activations = []
+        # for _ in range(4):
+        #     layer = []
+        #     for _ in range(64):
+        #         layer.append({})
+        #     dic_filters_activations.append(layer)
+        #
         # with torch.no_grad():
         #     for batch_index, batch in enumerate(eval_dataloader):
         #         x, y = batch
         #         x = x.double().cuda()
-        #         x1, x2, x3, x4 = model.view(x)
-        #         print("x:", x1.shape)
+        #         layers_out = model.view(x)
         #         # print("bin x:", bin_x)
         #
-        #         dic_filters_activations = []
-        #         for _ in range(4):
-        #             layer = []
-        #             for _ in range(64):
-        #                 layer.append({})
-        #             dic_filters_activations.append(layer)
         #
         #         i = 0
         #         for classe in classes:
         #             for j in range(n):
-        #                 feat_x = x1[i]
-        #                 background.df[background.df['class_id'] == classe]['filepath'][:n].to_string()
+        #
+        #                 name = background.df[background.df['class_id'] == classe]['filepath'].iloc[j]
         #                 for layer in range(4):
+        #                     feat_x = layers_out[layer][i]
         #                     for filter in range(64):
         #                         out_filter = feat_x[filter]
         #                         max_activation = torch.max(out_filter).item()
         #                         dic_filters_activations[layer][filter][name] = max_activation
         #                 i += 1
+        #         break
+        #     for layer in range(4):
+        #         for filter in range(64):
+        #             n = 0
+        #             print("filter:", filter)
+        #             for key, value in sorted(dic_filters_activations[layer][filter].items(), key=lambda kv: (kv[1], kv[0]),
+        #                                      reverse=True):
+        #                 print(key, value)
+        #                 if not os.path.exists( os.path.join('view_model', str(layer), 'filter'+str(filter))):
+        #                     os.makedirs(os.path.join('view_model', str(layer), 'filter'+str(filter)))
+        #                 copyfile(key, os.path.join('view_model', str(layer), 'filter'+str(filter), str(n)+'.png'))
+        #                 n += 1
+        #                 if n == 20:
+        #                     break
