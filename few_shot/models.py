@@ -58,6 +58,20 @@ def conv_block(in_channels: int, out_channels: int, conv_size=3) -> nn.Module:
     )
 
 
+def deconv_block(in_channels: int, out_channels: int, conv_size=3) -> nn.Module:
+    """Returns a Module that performs 3x3 convolution, ReLu activation, 2x2 max pooling.
+
+    # Arguments
+        in_channels:
+        out_channels:
+    """
+    return nn.Sequential(
+        nn.ConvTranspose2d(in_channels, out_channels, conv_size, padding=1),
+        nn.BatchNorm2d(out_channels),
+        nn.ReLU()
+    )
+
+
 def functional_conv_block(x: torch.Tensor, weights: torch.Tensor, biases: torch.Tensor,
                           bn_weights, bn_biases) -> torch.Tensor:
     """Performs 3x3 convolution, ReLu activation, 2x2 max pooling in a functional fashion.
@@ -440,3 +454,58 @@ class SemanticBinaryClassifier(nn.Module):
         x = self.binary_act([x, self.slope])
 
         return self.logits(x), x
+
+
+class SemanticBinaryAutoEncoder(nn.Module):
+    def __init__(self, num_input_channels: int, size_binary_layer: int=10, size_continue_layer: int=10,
+                 stochastic: bool=True):
+        super(SemanticBinaryAutoEncoder, self).__init__()
+        self.size_continue_layer = size_continue_layer
+        self.conv1 = conv_block(num_input_channels, 64)
+        self.conv2 = conv_block(64, 64)
+        self.dense_bin = nn.Linear(3136, size_binary_layer)
+        self.dense_cont = nn.Linear(3136, size_continue_layer)
+
+        self.deconv1 = deconv_block(64, 64)
+        self.deconv2 = deconv_block(64, 64)
+        self.deconv3 = nn.ConvTranspose2d(64, 64, 3)
+
+        if stochastic:
+            self.binary_act = StochasticBinaryActivation(estimator='ST')
+        else:
+            self.binary_act = DeterministicBinaryActivation(estimator='ST')
+
+
+    def encoder(self, x):
+        #  return latent space with binary semantic part and continue example variation
+        # batch examples have the same class
+        # maybe reduce hamming
+        x = self.conv1(x)
+        x = self.conv2(x)
+
+        x1 = self.dense_bin(x)
+        x2 = self.dense_cont(x)
+
+        x1 = self.binary_act(x1)
+        x2 = F.relu(x2)
+
+        return x1, x2
+
+    def decoder(self, latent_space):
+        x = self.deconv1(latent_space)
+        x = self.deconv2(x)
+        x = F.tanh(self.deconv3(x))
+        return x
+
+    def binary_space_decoder(self, binary_latent_space, n_noise):
+        # construct an example of the same class with a binary_latent_space and a noise vector
+        n = torch.distributions.Uniform(0, 1)
+        noise = n.sample((n_noise, self.size_continue_layer))
+        latent_space = torch.cat((binary_latent_space, noise))
+        return self.decoder(latent_space)
+
+    def forward(self, x):
+        bina, cont = self.encoder(x)
+        x1 = self.decoder(torch.cat((bina, cont)))
+        x2 = self.binary_space_decoder(bina)
+        return x1, x2
