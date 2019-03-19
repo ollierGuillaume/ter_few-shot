@@ -195,7 +195,7 @@ class TestSemanticClassification(unittest.TestCase):
         setup_dirs()
         assert torch.cuda.is_available()
 
-        device = torch.device('cuda:1')
+        device = torch.device('cuda')
         torch.backends.cudnn.benchmark = True
 
         model = FewShotClassifier(1, k).to(device, dtype=torch.double)
