@@ -138,6 +138,7 @@ class FewShotClassifier(nn.Module):
         self.features = nn.Sequential(*self.features)
 
         self.feature_outputs = [0] * len(self.features)
+        self.pool_indices = dict()
 
     def forward(self, x):
 
