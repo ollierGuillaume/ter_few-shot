@@ -54,7 +54,7 @@ def conv_block(in_channels: int, out_channels: int, conv_size=3) -> nn.Module:
         nn.Conv2d(in_channels, out_channels, conv_size, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2)
+        nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True)
     )
 
 
