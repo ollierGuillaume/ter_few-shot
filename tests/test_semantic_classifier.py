@@ -245,7 +245,7 @@ class TestSemanticClassification(unittest.TestCase):
             progressbar,
 
             ModelCheckpoint(
-                filepath=os.path.join(PATH, 'models', 'semantic_classifier', 'test_k=900_few_shot_classifier.pth'),
+                filepath=os.path.join(PATH, 'models', 'semantic_classifier', 'test_k=900_few_shot_classifier1.pth'),
                 monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
             ),
             ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),

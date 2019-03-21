@@ -130,16 +130,24 @@ class FewShotClassifier(nn.Module):
 
         self.logits = nn.Linear(final_layer_size, k_way)
 
-    def forward(self, x):
-        x = self.conv1(x)
-        # print("conv1 shape:", x.shape)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
+        self.features = []
+        self.features += self.conv1
+        self.features += self.conv2
+        self.features += self.conv3
+        self.features += self.conv4
+        self.features = nn.Sequential(*self.features)
 
+        self.feature_outputs = [0] * len(self.features)
+
+    def forward(self, x):
+
+        x = self.forward_features(x)
         x = x.view(x.size(0), -1)
 
         return self.logits(x)
+
+    def get_conv_layer_indices(self):
+        return [0, 4, 8, 12]
 
     def functional_forward(self, x, weights):
         """Applies the same forward pass using PyTorch functional operators using a specified set of weights."""
@@ -161,6 +169,18 @@ class FewShotClassifier(nn.Module):
         x4 = self.conv4(x3)
 
         return x1, x2, x3, x4
+
+    def forward_features(self, x):
+        output = x
+        for i, layer in enumerate(self.features):
+            if isinstance(layer, torch.nn.MaxPool2d):
+                output, indices = layer(output)
+                self.feature_outputs[i] = output
+                self.pool_indices[i] = indices
+            else:
+                output = layer(output)
+                self.feature_outputs[i] = output
+        return output
 
 class MatchingNetwork(nn.Module):
     def __init__(self, n: int, k: int, q: int, fce: bool, num_input_channels: int,
@@ -456,56 +476,79 @@ class SemanticBinaryClassifier(nn.Module):
         return self.logits(x), x
 
 
-class SemanticBinaryAutoEncoder(nn.Module):
-    def __init__(self, num_input_channels: int, size_binary_layer: int=10, size_continue_layer: int=10,
-                 stochastic: bool=True):
-        super(SemanticBinaryAutoEncoder, self).__init__()
-        self.size_continue_layer = size_continue_layer
-        self.conv1 = conv_block(num_input_channels, 64)
-        self.conv2 = conv_block(64, 64)
-        self.dense_bin = nn.Linear(3136, size_binary_layer)
-        self.dense_cont = nn.Linear(3136, size_continue_layer)
+class FewShotDeconv(nn.Module):
+    def __init__(self, model):
+        #0 nn.Conv2d(1, 64, 3, padding=1),
+        #1 nn.BatchNorm2d(64),
+        #2 nn.ReLU(),
+        #3 nn.MaxPool2d(kernel_size=2, stride=2)
+        #4 nn.Conv2d(64, 64, 3, padding=1),
+        #5 nn.BatchNorm2d(64),
+        #6 nn.ReLU(),
+        #7 nn.MaxPool2d(kernel_size=2, stride=2)
+        #8 nn.Conv2d(64, 64, 3, padding=1),
+        #9 nn.BatchNorm2d(64),
+        #10 nn.ReLU(),
+        #11 nn.MaxPool2d(kernel_size=2, stride=2)
+        #12 nn.Conv2d(64, 64, 3, padding=1),
+        #13 nn.BatchNorm2d(64),
+        #14 nn.ReLU(),
+        #15 nn.MaxPool2d(kernel_size=2, stride=2)
+        super(FewShotDeconv, self).__init__()
 
-        self.deconv1 = deconv_block(64, 64)
-        self.deconv2 = deconv_block(64, 64)
-        self.deconv3 = nn.ConvTranspose2d(64, 64, 3)
+        self.model = model
+        self.conv2DeconvIdx = {0: 7, 4: 5, 8: 3, 12: 1}
+        self.conv2DeconvBiaisIdx = {0: 5, 4: 3, 8: 1, 12: 0}
+        self.unpool2PoolIdx = {6: 3, 4: 7, 2: 11, 0: 15}
 
-        if stochastic:
-            self.binary_act = StochasticBinaryActivation(estimator='ST')
-        else:
-            self.binary_act = DeterministicBinaryActivation(estimator='ST')
+        self.deconv_features = torch.nn.Sequential(
+            nn.MaxUnpool2d(2, stride=2), #0
+            nn.ConvTranspose2d(64, 64, 3, padding=1),#1
+            nn.MaxUnpool2d(2, stride=2),#2
+            nn.ConvTranspose2d(64, 64, 3, padding=1),#3
+            nn.MaxUnpool2d(2, stride=2),#4
+            nn.ConvTranspose2d(64, 64, 3, padding=1),#5
+            nn.MaxUnpool2d(2, stride=2),#6
+            nn.ConvTranspose2d(64, 1, 3, padding=1)#7
+        )
+
+        self.deconv_first_layers = nn.ModuleList([
+            nn.MaxUnpool2d(2, stride=2),
+            nn.ConvTranspose2d(1, 64, 3, padding=1),
+            nn.MaxUnpool2d(2, stride=2),
+            nn.ConvTranspose2d(1, 64, 3, padding=1),
+            nn.MaxUnpool2d(2, stride=2),
+            nn.ConvTranspose2d(1, 64, 3, padding=1),
+            nn.MaxUnpool2d(2, stride=2),
+            nn.ConvTranspose2d(1, 1, 3, padding=1)
+        ])
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        # initializing weights using ImageNet-trained model from PyTorch
+        for i, layer in enumerate(self.model.features):
+            if isinstance(layer, nn.Conv2d):
+                self.deconv_features[self.conv2DeconvIdx[i]].weight.data = layer.weight.data
+                biasIdx = self.conv2DeconvBiaisIdx[i]
+                if biasIdx > 0:
+                    self.deconv_features[biasIdx].bias.data = layer.bias.data
+
+    def forward(self, x, layer_number, map_number, pool_indices):
+        start_idx = self.conv2DeconvIdx[layer_number]
+        if not isinstance(self.deconv_first_layers[start_idx], nn.ConvTranspose2d):
+            raise ValueError('Layer ' + str(layer_number) + ' is not of type Conv2d')
+        # set weight and bias
+        self.deconv_first_layers[start_idx].weight.data = self.deconv_features[start_idx].weight[map_number].data[None, :, :, :]
+        self.deconv_first_layers[start_idx].bias.data = self.deconv_features[start_idx].bias.data
+        # first layer will be single channeled, since we're picking a particular filter
+        output = self.deconv_first_layers[start_idx](x)
+
+        # transpose conv through the rest of the network
+        for i in range(start_idx + 1, len(self.deconv_features)):
+            if isinstance(self.deconv_features[i], nn.MaxUnpool2d):
+                output = self.deconv_features[i](output, pool_indices[self.unpool2PoolIdx[i]])
+            else:
+                output = self.deconv_features[i](output)
+        return output
 
 
-    def encoder(self, x):
-        #  return latent space with binary semantic part and continue example variation
-        # batch examples have the same class
-        # maybe reduce hamming
-        x = self.conv1(x)
-        x = self.conv2(x)
-
-        x1 = self.dense_bin(x)
-        x2 = self.dense_cont(x)
-
-        x1 = self.binary_act(x1)
-        x2 = F.relu(x2)
-
-        return x1, x2
-
-    def decoder(self, latent_space):
-        x = self.deconv1(latent_space)
-        x = self.deconv2(x)
-        x = F.tanh(self.deconv3(x))
-        return x
-
-    def binary_space_decoder(self, binary_latent_space, n_noise):
-        # construct an example of the same class with a binary_latent_space and a noise vector
-        n = torch.distributions.Uniform(0, 1)
-        noise = n.sample((n_noise, self.size_continue_layer))
-        latent_space = torch.cat((binary_latent_space, noise))
-        return self.decoder(latent_space)
-
-    def forward(self, x):
-        bina, cont = self.encoder(x)
-        x1 = self.decoder(torch.cat((bina, cont)))
-        x2 = self.binary_space_decoder(bina)
-        return x1, x2
