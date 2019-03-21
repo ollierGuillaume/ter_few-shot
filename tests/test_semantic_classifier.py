@@ -190,7 +190,7 @@ class TestSemanticClassification(unittest.TestCase):
 
     def test_view_conv(self):
         n = 5
-        k = 900
+        k = 300
 
         setup_dirs()
         assert torch.cuda.is_available()
@@ -245,11 +245,11 @@ class TestSemanticClassification(unittest.TestCase):
             progressbar,
 
             ModelCheckpoint(
-                filepath=os.path.join(PATH, 'models', 'semantic_classifier', 'test_k=900_few_shot_classifier1.pth'),
+                filepath=os.path.join(PATH, 'models', 'semantic_classifier', 'test_k=300_few_shot_classifier1.pth'),
                 monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
             ),
             ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
-            CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', 'test_k=900_few_shot_classifier.csv'))
+            CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', 'test_k=300_few_shot_classifier.csv'))
         ]
 
         fit(
