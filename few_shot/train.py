@@ -36,7 +36,7 @@ def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: tor
             y_pred, _ = y_pred
         loss = loss_fn(y_pred, y_sub_batch)
         loss.backward()
-        optimiser.step()
+        #optimiser.step()
         losses.append(loss)
         predictions.append(y_pred)
 
