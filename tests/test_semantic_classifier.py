@@ -51,7 +51,7 @@ class TestSemanticClassification(unittest.TestCase):
         # model = SemanticBinaryClassifier(1, k, size_binary_layer=size_binary_layer, stochastic=stochastic,
         #                                  size_dense_layer_before_binary=None,
         #                                  n_conv_layers=n_conv_layers)
-        model = FewShotClassifier(1, k).to(device, dtype=torch.double)
+        model = FewShotClassifier(1, k)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                       model_name+".pth")))
         for param in model.parameters():
