@@ -25,7 +25,7 @@ class TestSemanticBinaryClassifier(nn.Module):
         self.logits = nn.Linear(size_binary_layer, k_way)
 
     def forward(self, x):
-        x = self.model(x)
+        _, x = self.model(x)
         return self.logits(x)
 
 
