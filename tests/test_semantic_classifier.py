@@ -33,7 +33,6 @@ class TestSemanticClassification(unittest.TestCase):
     def test(self):
         k = 200
         n = 5
-        lr = 0.01
         epochs = 20
         size_binary_layer = k
         # stochastic = False
@@ -77,7 +76,6 @@ class TestSemanticClassification(unittest.TestCase):
 
         test_model = TestSemanticBinaryClassifier(k, model, size_binary_layer=size_binary_layer)\
             .to(device, dtype=torch.double)
-        optimiser = torch.optim.Adam(test_model.parameters(), lr=lr)
         loss_fn = nn.CrossEntropyLoss().to(device)
 
         def prepare_batch(n, k):
@@ -111,7 +109,7 @@ class TestSemanticClassification(unittest.TestCase):
 
         fit(
             test_model,
-            optimiser,
+            None,
             loss_fn,
             epochs=100,
             dataloader=train_dataloader,
