@@ -103,7 +103,6 @@ class TestSemanticClassification(unittest.TestCase):
                 filepath=os.path.join(PATH, 'models', 'semantic_classifier', model_name + 'test_other_class.pth'),
                 monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
             ),
-            ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
             CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', model_name + 'test_other_class.csv'))
         ]
 
