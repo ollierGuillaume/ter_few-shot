@@ -39,7 +39,7 @@ class TestSemanticClassification(unittest.TestCase):
         # stochastic = False
         # n_conv_layers = 2
 
-        model_name = 'test_k=200_few_shot_classifier'
+        model_name = 'test_k=200_few_shot_classifier_untrained'
         validation_split = .2
 
         setup_dirs()
@@ -52,8 +52,8 @@ class TestSemanticClassification(unittest.TestCase):
         #                                  size_dense_layer_before_binary=None,
         #                                  n_conv_layers=n_conv_layers)
         model = FewShotClassifier(1, k)
-        model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
-                                                      model_name+".pth")))
+        #model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
+        #                                              model_name+".pth")))
         for param in model.parameters():
             param.requires_grad = False
 
