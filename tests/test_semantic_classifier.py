@@ -31,17 +31,6 @@ class TestSemanticBinaryClassifier(nn.Module):
 
 class TestSemanticClassification(unittest.TestCase):
     # def test(self):
-    #     # parser = argparse.ArgumentParser()
-    #     #
-    #     # parser.add_argument('--n', default=1, type=int)
-    #     # parser.add_argument('--k', default=100, type=int)
-    #     # parser.add_argument('--lr', default=0.01, type=float)
-    #     # parser.add_argument('--epochs', default=10, type=int)
-    #     # parser.add_argument('--size-binary-layer', default=10, type=int)
-    #     # parser.add_argument('--stochastic', action='store_true')
-    #     #
-    #     # parser.add_argument('--epochs-test-model', default=10, type=int)
-    #     # args = parser.parse_args()
     #     k = 100
     #     n = 5
     #     lr = 0.01
@@ -190,7 +179,7 @@ class TestSemanticClassification(unittest.TestCase):
 
     def test_view_conv(self):
         n = 5
-        k = 300
+        k = 200
 
         setup_dirs()
         assert torch.cuda.is_available()
@@ -249,7 +238,7 @@ class TestSemanticClassification(unittest.TestCase):
                 monitor='val_' + str(n) + '-shot_' + str(k) + '-way_acc'
             ),
             ReduceLROnPlateau(patience=10, factor=0.5, monitor='val_loss'),
-            CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', 'test_k=300_few_shot_classifier.csv'))
+            CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', 'test_k=200_few_shot_classifier.csv'))
         ]
 
         fit(

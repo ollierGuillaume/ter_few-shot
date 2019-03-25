@@ -8,11 +8,15 @@ import os
 import numpy as np
 from PIL import Image
 from skimage import io
-
+from math import sqrt, ceil
+import sys
+import random
 
 def vis_layer(activ_map):
     plt.ion()
     plt.imshow(activ_map[:, :, 0], cmap='gray')
+    # plt.savefig('deconvnet'+str(i)+'.png')
+    # plt.show()
 
 def decon_img(layer_output):
     raw_img = layer_output.data.numpy()[0].transpose(1,2,0)
@@ -44,16 +48,16 @@ class TestDeconvNetFewShot(unittest.TestCase):
 
         img_filename = os.path.join( DATA_PATH ,'Omniglot',
                                      'images_background',
-                                     'Japanese_(hiragana).0',
-                                     'character07',
-                                     '0494_01.108002.png')
+                                     'Latin.0',
+                                     'character16',
+                                     '0698_01.137602.png')
         img = io.imread(img_filename)
         img = img[np.newaxis, np.newaxis, :, :]
         img = (img - img.min()) / (img.max() - img.min())
         img = torch.from_numpy(img)
         print(img.size())
         n = 5
-        k = 900
+        k = 300
         setup_dirs()
         assert torch.cuda.is_available()
 
@@ -62,11 +66,11 @@ class TestDeconvNetFewShot(unittest.TestCase):
 
         model = FewShotClassifier(1, k).to(device, dtype=torch.double)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
-                                                      "test_k=900_few_shot_classifier.pth")))
+                                                      "test_k=300_few_shot_classifier.pth")))
 
         conv_out = model(img)
 
-        deconv_model = FewShotDeconv(model)
+        deconv_model = FewShotDeconv(model).to(device, dtype=torch.double)
 
         conv_layer_indices = model.get_conv_layer_indices()
 
@@ -74,13 +78,16 @@ class TestDeconvNetFewShot(unittest.TestCase):
         plt.figure(figsize=(10, 5))
 
         done = False
+        i=0
         while not done:
-            layer = input('Layer to view (0-4, -1 to exit): ')
+            layer = input('Layer to view (0-12, -1 to exit): ')
             try:
                 layer = int(layer)
             except ValueError:
                 continue
-            print(model.feature_outputs)
+
+            if layer < 0:
+                sys.exit(0)
             activ_map = model.feature_outputs[layer].data.numpy()
             activ_map = activ_map.transpose(1, 2, 3, 0)
             activ_map_grid = vis_grid(activ_map)
@@ -97,7 +104,7 @@ class TestDeconvNetFewShot(unittest.TestCase):
 
             marker = None
             while True:
-                choose_map = input('Select map?  (y/[n]): ') == 'y'
+                choose_map = True# input('Select map?  (y/[n]): ') == 'y'
                 if marker != None:
                     marker.pop(0).remove()
 
@@ -121,10 +128,15 @@ class TestDeconvNetFewShot(unittest.TestCase):
                 decon = deconv_model(model.feature_outputs[layer][0][map_idx][None, None, :, :], conv_layer, map_idx,
                                 model.pool_indices)
                 img = decon_img(decon)
+                img = img.reshape((28,28))
+                print(img.shape)
                 plt.subplot(121)
+                vis_layer(activ_map_grid)
                 marker = plt.plot(x_pos, y_pos, marker='+', color='red')
                 plt.subplot(122)
                 plt.imshow(img)
+                # plt.savefig('deconvnet' + str(x_pos) + '_' + str(y_pos) + '_hiragana13_layer=' + str(layer)+ '.png')
+                i += 1
 
 
 if __name__ == '__main__':
