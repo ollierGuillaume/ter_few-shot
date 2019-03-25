@@ -30,7 +30,8 @@ def gradient_step(model: Module, optimiser: Optimizer, loss_fn: Callable, x: tor
         y_sub_batch = y[i:i+max_batch]
         x_sub_batch = x[i:i+max_batch]
         model.train()
-        optimiser.zero_grad()
+        if optimiser is not None:
+            optimiser.zero_grad()
         y_pred = model(x_sub_batch)
         if len(y_pred) == 2:
             y_pred, _ = y_pred
