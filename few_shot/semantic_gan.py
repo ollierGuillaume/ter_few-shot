@@ -125,7 +125,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
 
     outputs = discriminator(images)
     # print (outputs.shape)
-    real_loss = criterionBCE(outputs, real_labels).to(device)
+    real_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
     real_score = outputs
 
     c, v = encoder(images_for_fake)
@@ -138,7 +138,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
     fake_labels = Variable(torch.zeros(images_for_fake.size(0)).to(device, dtype=torch.double))
 
     outputs = discriminator(fake_images)
-    fake_loss = criterionBCE(outputs, fake_labels).to(device)
+    fake_loss = criterionBCE(outputs, fake_labels).to(device, dtype=torch.double)
     fake_score = outputs
 
     d_loss = real_loss + fake_loss
@@ -182,7 +182,7 @@ def train_dae(encoder, generator, discriminator, images, device, e_optimizer, g_
     reconstr_images = generator(z1, z2)
     outputs = discriminator(reconstr_images)
     real_labels = Variable(torch.ones(images.size(0)).to(device))
-    dae_loss = criterionBCE(outputs, real_labels).to(device)
+    dae_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
     dae_score = outputs
     dae_loss.backward()
     e_optimizer.step()
@@ -388,7 +388,6 @@ def fit_gan_few_shot(encoder: Module, generator: Module, classifier: Module, dis
             callbacks.on_batch_begin(batch_index, batch_logs)
 
             x, y = prepare_batch(batch)
-            print("x size:",x.size())
             cl_loss, cl_score, dae_loss, ae_loss, cae_loss = gradient_step_gan_few_shot(e_optimizer, g_optimizer, c_optimizer, d_optimizer,
                                                                      x, y, device,
                                                                      encoder, generator, classifier, discriminator,
