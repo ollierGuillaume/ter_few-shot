@@ -123,7 +123,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
 
     real_labels = Variable(torch.ones(images.size(0)).to(device, dtype=torch.double))
 
-    outputs = discriminator(images).to(device, dtype=torch.double)
+    outputs = discriminator(images)
     # print (outputs.shape)
     real_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
     real_score = outputs
