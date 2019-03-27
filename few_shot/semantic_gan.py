@@ -125,7 +125,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
 
     outputs = discriminator(images)
     # print (outputs.shape)
-    real_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
+    real_loss = criterionBCE(outputs, real_labels).to(device)
     real_score = outputs
 
     c, v = encoder(images_for_fake)
@@ -335,7 +335,7 @@ def fit_gan_few_shot(encoder: Module, generator: Module, classifier: Module, dis
             c, v = encoder(x)
             return classifier(c)
 
-    encoderclassifier = EncoderClassifier()
+    encoderclassifier = EncoderClassifier().to(device, dtype=torch.double)
 
     callbacks.set_model(encoderclassifier)
     callbacks.set_params({
