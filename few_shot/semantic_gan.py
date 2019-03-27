@@ -180,7 +180,7 @@ def train_dae(encoder, generator, discriminator, images, device, e_optimizer, g_
     generator.zero_grad()
     z1, z2 = encoder(images)
     reconstr_images = generator(z1, z2)
-    outputs = discriminator(reconstr_images).to(device, dtype=torch.double)
+    outputs = discriminator(reconstr_images)
     real_labels = Variable(torch.ones(images.size(0)).to(device, dtype=torch.double))
     dae_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
     dae_score = outputs
@@ -200,8 +200,8 @@ def train_dae_noisy(encoder, generator, discriminator, images, latent_size, devi
     new_images = generator(c, noisy1)
 
     outputs = discriminator(new_images)
-    real_labels = Variable(torch.ones(images.size(0)).to(device))
-    dae_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
+    real_labels = Variable(torch.ones(images.size(0)).to(device, dtype=torch.double))
+    dae_loss = criterionBCE(outputs, real_labels).to(device)
     dae_score = outputs
     dae_loss.backward()
     e_optimizer.step()
