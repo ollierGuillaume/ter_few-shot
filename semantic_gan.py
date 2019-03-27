@@ -113,7 +113,6 @@ if __name__ == '__main__':
 
         return prepare_batch_
 
-
     progressbar = ProgressBarLogger()
     progressbar.set_params({'num_batches': args.k * args.n, 'metrics': ['categorical_accuracy'],
                             'verbose': 1})

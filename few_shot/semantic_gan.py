@@ -331,7 +331,16 @@ def fit_gan_few_shot(encoder: Module, generator: Module, classifier: Module, dis
     batch_size = dataloader.batch_size
 
     callbacks = CallbackList([DefaultCallback(), ] + (callbacks or []) + [ProgressBarLogger(), ])
-    callbacks.set_model(classifier)
+
+
+    class EncoderClassifier(nn.Module):
+        def forward(self, x):
+            c, v = encoder(x)
+            return classifier(c)
+
+    encoderclassifier = EncoderClassifier()
+
+    callbacks.set_model(encoderclassifier)
     callbacks.set_params({
         'num_batches': num_batches,
         'batch_size': batch_size,
