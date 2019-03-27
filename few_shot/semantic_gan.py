@@ -1,7 +1,4 @@
-from _cython_0_25_2 import generator
-
 import torch
-from docutils.nodes import classifier
 from few_shot.models import *
 from torch import nn
 from few_shot.callbacks import CallbackList, DefaultCallback, ModelCheckpoint, Callback, ProgressBarLogger
