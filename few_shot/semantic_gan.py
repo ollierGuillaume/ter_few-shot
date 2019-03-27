@@ -125,7 +125,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
 
     outputs = discriminator(images)
     # print (outputs.shape)
-    real_loss = criterionBCE(outputs, real_labels)
+    real_loss = criterionBCE(outputs, real_labels).to(device)
     real_score = outputs
 
     c, v = encoder(images_for_fake)
@@ -138,7 +138,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
     fake_labels = Variable(torch.zeros(images_for_fake.size(0)).to(device, dtype=torch.double))
 
     outputs = discriminator(fake_images)
-    fake_loss = criterionBCE(outputs, fake_labels)
+    fake_loss = criterionBCE(outputs, fake_labels).to(device)
     fake_score = outputs
 
     d_loss = real_loss + fake_loss
