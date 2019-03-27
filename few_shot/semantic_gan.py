@@ -109,8 +109,8 @@ class SemanticBinaryDiscriminator(nn.Module):
         x = self.conv3(x)
         x = self.conv4(x)
         x = x.view(x.size(0), -1)
-        x = self.fc1(x)
-        return self.logits(x)
+        x = F.relu(self.fc1(x))
+        return F.sigmoid(self.logits(x))
 
 criterionBCE = nn.BCELoss()
 criterionClass = nn.CrossEntropyLoss()
@@ -201,8 +201,7 @@ def train_dae_noisy(encoder, generator, discriminator, images, latent_size, devi
 
     outputs = discriminator(new_images)
     real_labels = Variable(torch.ones(images.size(0)).to(device, dtype=torch.double))
-    print(outputs, real_labels)
-    dae_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
+    dae_loss = criterionBCE(outputs, real_labels).to(device)
     dae_score = outputs
     dae_loss.backward()
     e_optimizer.step()
