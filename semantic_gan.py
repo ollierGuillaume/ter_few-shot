@@ -113,14 +113,10 @@ if __name__ == '__main__':
 
         return prepare_batch_
 
-    progressbar = ProgressBarLogger()
-    progressbar.set_params({'num_batches': args.k * args.n, 'metrics': ['categorical_accuracy'],
-                            'verbose': 1})
     evalmetrics = EvaluateMetrics(eval_dataloader)
 
     callbacks = [
         evalmetrics,
-        progressbar,
 
         ModelCheckpoint(
             filepath=os.path.join(PATH, 'models', 'semantic_classifier', str(param_str) + '.pth'),

@@ -123,7 +123,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
 
     real_labels = Variable(torch.ones(images.size(0)).to(device, dtype=torch.double))
 
-    outputs = discriminator(images)
+    outputs = discriminator(images).to(device, dtype=torch.double)
     # print (outputs.shape)
     real_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
     real_score = outputs
@@ -137,7 +137,7 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
 
     fake_labels = Variable(torch.zeros(images_for_fake.size(0)).to(device, dtype=torch.double))
 
-    outputs = discriminator(fake_images)
+    outputs = discriminator(fake_images).to(device, dtype=torch.double)
     fake_loss = criterionBCE(outputs, fake_labels).to(device, dtype=torch.double)
     fake_score = outputs
 
@@ -180,8 +180,8 @@ def train_dae(encoder, generator, discriminator, images, device, e_optimizer, g_
     generator.zero_grad()
     z1, z2 = encoder(images)
     reconstr_images = generator(z1, z2)
-    outputs = discriminator(reconstr_images)
-    real_labels = Variable(torch.ones(images.size(0)).to(device))
+    outputs = discriminator(reconstr_images).to(device, dtype=torch.double)
+    real_labels = Variable(torch.ones(images.size(0)).to(device, dtype=torch.double))
     dae_loss = criterionBCE(outputs, real_labels).to(device, dtype=torch.double)
     dae_score = outputs
     dae_loss.backward()
