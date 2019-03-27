@@ -121,8 +121,8 @@ def train_discriminator(encoder, generator, discriminator, images, d_optimizer, 
     encoder.zero_grad()
     generator.zero_grad()
 
-    real_labels = Variable(torch.ones(images.size(0)))
-    real_labels = real_labels.to(device, dtype=torch.double)
+    real_labels = Variable(torch.ones(images.size(0)).to(device, dtype=torch.double))
+
     outputs = discriminator(images)
     # print (outputs.shape)
     real_loss = criterionBCE(outputs, real_labels).to(device)
