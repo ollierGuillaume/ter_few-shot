@@ -118,11 +118,7 @@ if __name__ == '__main__':
     callbacks = [
         evalmetrics,
 
-        ModelCheckpoint(
-            filepath=os.path.join(PATH, 'models', 'semantic_classifier', str(param_str) + '.pth'),
-            monitor='val_' + str(args.n) + '-shot_' + str(args.k) + '-way_acc'
-        ),
-        CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', str(param_str) + '.csv'))
+        CSVLogger(os.path.join(PATH, 'logs', 'semantic_gan', str(param_str) + '.csv'))
     ]
 
 

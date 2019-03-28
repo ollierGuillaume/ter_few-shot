@@ -16,6 +16,7 @@ import numpy as np
 import os
 import pandas as pd
 from shutil import copyfile
+from torchsummary import summary
 
 class TestSemanticBinaryClassifier(nn.Module):
     def __init__(self, k_way: int, semantic_model, size_binary_layer=10):
@@ -34,11 +35,12 @@ class TestSemanticClassification(unittest.TestCase):
         k = 200
         n = 5
         epochs = 20
-        size_binary_layer = 30
-        stochastic = True
-        n_conv_layers = 3
+        size_binary_layer = 40
+        stochastic = False
+        n_conv_layers = 1
+        lr = 0.01
 
-        model_name = 'omniglot__n=5_k=200_epochs=500__lr=0.01__size_binary_layer=30__stochastic__n_conv_layers=3'
+        model_name = 'omniglot__n=5_k=200_epochs=50__lr=0.01__size_binary_layer=40__deterministic__n_conv_layers=1'
         validation_split = .2
 
         setup_dirs()
@@ -52,9 +54,8 @@ class TestSemanticClassification(unittest.TestCase):
                                          n_conv_layers=n_conv_layers)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                      model_name+".pth")))
-        for param in model.parameters():
-            param.requires_grad = False
 
+        optimiser = torch.optim.Adam(model.parameters(), lr=lr)
         evaluation = OmniglotDataset('evaluation')
 
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
@@ -73,8 +74,7 @@ class TestSemanticClassification(unittest.TestCase):
             num_workers=8
         )
 
-        test_model = TestSemanticBinaryClassifier(k, model, size_binary_layer=size_binary_layer)\
-            .to(device, dtype=torch.double)
+        test_model = TestSemanticBinaryClassifier(k, model, size_binary_layer=size_binary_layer).to(device, dtype=torch.double)
         loss_fn = nn.CrossEntropyLoss().to(device)
 
         def prepare_batch(n, k):
@@ -86,9 +86,6 @@ class TestSemanticClassification(unittest.TestCase):
                 return x, y
             return prepare_batch_
 
-        progressbar = ProgressBarLogger()
-        progressbar.set_params({'num_batches': k * n, 'metrics': ['categorical_accuracy'], 'loss': loss_fn,
-                            'verbose': 1})
         evalmetrics = EvaluateMetrics(eval_dataloader)
         evalmetrics.set_params({'metrics': ['categorical_accuracy'],
                             'prepare_batch': prepare_batch(n, k),
@@ -96,7 +93,6 @@ class TestSemanticClassification(unittest.TestCase):
 
         callbacks = [
             evalmetrics,
-            progressbar,
 
             ModelCheckpoint(
                 filepath=os.path.join(PATH, 'models', 'semantic_classifier', model_name + 'test_other_class.pth'),
@@ -105,9 +101,12 @@ class TestSemanticClassification(unittest.TestCase):
             CSVLogger(os.path.join(PATH, 'logs', 'semantic_classifier', model_name + 'test_other_class.csv'))
         ]
 
+        #print(summary(model, (1, 28, 28)))
+        for param in model.parameters():
+            param.requires_grad = False
         fit(
             test_model,
-            None,
+            optimiser,
             loss_fn,
             epochs=100,
             dataloader=train_dataloader,
