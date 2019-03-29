@@ -297,8 +297,11 @@ def gradient_step_gan_few_shot(e_optimizer: Optimizer, g_optimizer: Optimizer, c
         cae_losses.append(cae_noisy_loss)
 
         images_old = images
-
-    return torch.stack(cl_losses).mean(), torch.stack(cl_scores).mean(), torch.stack(dae_losses).mean(), torch.stack(ae_losses).mean(), torch.stack(cae_losses).mean()
+        if is_complete:
+            dae_losses = torch.stack(dae_losses).mean()
+        else:
+            dae_losses = 0
+    return torch.stack(cl_losses).mean(), torch.stack(cl_scores).mean(), dae_losses, torch.stack(ae_losses).mean(), torch.stack(cae_losses).mean()
 
 
 
