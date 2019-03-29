@@ -16,7 +16,7 @@ import numpy as np
 import os
 import pandas as pd
 from shutil import copyfile
-from torchsummary import summary
+
 
 class TestSemanticBinaryClassifier(nn.Module):
     def __init__(self, k_way: int, semantic_model, size_binary_layer=10):
