@@ -399,13 +399,14 @@ def fit_gan_few_shot(encoder: Module, generator: Module, classifier: Module, dis
                                                                      latent_sizeB, latent_sizeC, epoch, is_complete=is_complete)
             batch_logs['cl_loss'] = cl_loss.item()
             #batch_logs['d_loss'] = d_loss.item()
-            batch_logs['dae_loss'] = dae_loss.item()
             batch_logs['ae_loss'] = ae_loss.item()
             batch_logs['cae_loss'] = cae_loss.item()
 
             batch_logs['cl_score'] = cl_score.item()
             #batch_logs['real_score'] = real_score.item()
             #batch_logs['fake_score'] = fake_score.item()
+            if is_complete:
+                batch_logs['dae_loss'] = dae_loss.item()
 
             callbacks.on_batch_end(batch_index, batch_logs)
 
