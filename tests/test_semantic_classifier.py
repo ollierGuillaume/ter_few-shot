@@ -23,7 +23,7 @@ class TestSemanticBinaryClassifier(nn.Module):
 
         super(TestSemanticBinaryClassifier, self).__init__()
         self.model = semantic_model
-        self.logits = nn.Linear(size_binary_layer, k_way)
+        self.logits = nn.Linear(200, k_way)
 
     def forward(self, x):
         x = self.model(x)
