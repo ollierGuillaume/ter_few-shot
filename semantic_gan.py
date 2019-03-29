@@ -33,6 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('--size-binary-layer', default=10, type=int)
     parser.add_argument('--size-continue-layer', default=10, type=int)
     parser.add_argument('--stochastic', action='store_true')
+    parser.add_argument('--simplified', action='store_true')
     # parser.add_argument('--eval-batches', default=20, type=int)
 
     # parser.add_argument('--inner-train-steps', default=1, type=int)
@@ -47,7 +48,8 @@ if __name__ == '__main__':
     param_str = str(dataset) + '__n=' + str(args.n) + '_k=' + str(args.k) \
                   + '_epochs=' + str(args.epochs) + '__lr=' + '__size_binary_layer=' \
                   + str(args.size_binary_layer) + '__size_continue_layer=' + str(args.size_continue_layer) \
-                  + ('__stochastic' if args.stochastic else '__deterministic')
+                  + ('__stochastic' if args.stochastic else '__deterministic')\
+                  + ('__simplified' if args.simplified else '')
     #            f'train_steps={args.inner_train_steps}_val_steps={args.inner_val_steps}'
 
     ###################
@@ -141,5 +143,6 @@ if __name__ == '__main__':
         c_optimizer,
         d_optimizer,
         metrics=['categorical_accuracy'],
-        callbacks=callbacks
+        callbacks=callbacks,
+        is_complete=not args.simplified
     )

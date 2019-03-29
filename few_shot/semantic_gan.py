@@ -232,7 +232,7 @@ images_old = None
 def gradient_step_gan_few_shot(e_optimizer: Optimizer, g_optimizer: Optimizer, c_optimizer: Optimizer, d_optimizer: Optimizer,
                                x: torch.Tensor, y: torch.Tensor, device,
                                encoder: Module, generator: Module, classifier: Module, discriminator: Module,
-                               latent_sizeC: int, latent_sizeB: int, epoch: int):
+                               latent_sizeC: int, latent_sizeB: int, epoch: int, is_complete=True):
 
     """Takes a single gradient step.
 
@@ -269,9 +269,10 @@ def gradient_step_gan_few_shot(e_optimizer: Optimizer, g_optimizer: Optimizer, c
         #### Adversarial discriminator
         if (images_old is not None):  # pas la premiere iteration
             # Train the discriminator
-            d_loss, real_score, fake_score = train_discriminator(encoder, generator, discriminator, images,
-                                                                 d_optimizer, device,
-                                                                 noisy=False, latent_size=latent_sizeC, images_for_fake=images_old)
+            if is_complete:
+                d_loss, real_score, fake_score = train_discriminator(encoder, generator, discriminator, images,
+                                                                    d_optimizer, device,
+                                                                    noisy=False, latent_size=latent_sizeC, images_for_fake=images_old)
 
             d_loss, real_score, fake_score = train_discriminator(encoder, generator, discriminator, images,
                                                                  d_optimizer, device,
@@ -285,9 +286,10 @@ def gradient_step_gan_few_shot(e_optimizer: Optimizer, g_optimizer: Optimizer, c
             ae_loss = train_ae(encoder, generator, images, e_optimizer, g_optimizer)
         ae_losses.append(ae_loss)
 
-        ### Autoencoder Discriminator
-        dae_loss = train_dae_noisy(encoder, generator, discriminator, images, latent_sizeC, device, e_optimizer, g_optimizer)
-        dae_losses.append(dae_loss)
+        # ### Autoencoder Discriminator
+        if is_complete:
+            dae_loss = train_dae_noisy(encoder, generator, discriminator, images, latent_sizeC, device, e_optimizer, g_optimizer)
+            dae_losses.append(dae_loss)
 
         #### Autoencoder noisy classifier
         class_labels = Variable(class_labels.to(device))
@@ -305,7 +307,7 @@ def fit_gan_few_shot(encoder: Module, generator: Module, classifier: Module, dis
         prepare_batch: Callable, latent_sizeC: int, latent_sizeB: int, device,
         e_optimizer: Optimizer, g_optimizer: Optimizer, c_optimizer: Optimizer, d_optimizer: Optimizer,
         metrics: List[Union[str, Callable]] = None, callbacks: List[Callback] = None,
-        verbose: bool = True):
+        verbose: bool = True, is_complete=True):
     """Function to abstract away training loop.
 
     The benefit of this function is that allows training scripts to be much more readable and allows for easy re-use of
@@ -391,7 +393,7 @@ def fit_gan_few_shot(encoder: Module, generator: Module, classifier: Module, dis
             cl_loss, cl_score, dae_loss, ae_loss, cae_loss = gradient_step_gan_few_shot(e_optimizer, g_optimizer, c_optimizer, d_optimizer,
                                                                      x, y, device,
                                                                      encoder, generator, classifier, discriminator,
-                                                                     latent_sizeB, latent_sizeC, epoch)
+                                                                     latent_sizeB, latent_sizeC, epoch, is_complete=is_complete)
             batch_logs['cl_loss'] = cl_loss.item()
             #batch_logs['d_loss'] = d_loss.item()
             batch_logs['dae_loss'] = dae_loss.item()
