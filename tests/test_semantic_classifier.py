@@ -55,7 +55,6 @@ class TestSemanticClassification(unittest.TestCase):
         model.load_state_dict(torch.load(os.path.join("models", "semantic_classifier",
                                                      model_name+".pth")))
 
-        optimiser = torch.optim.Adam(model.parameters(), lr=lr)
         evaluation = OmniglotDataset('evaluation')
 
         classes = np.random.choice(evaluation.df['class_id'].unique(), size=k)
@@ -76,6 +75,7 @@ class TestSemanticClassification(unittest.TestCase):
 
         test_model = TestSemanticBinaryClassifier(k, model, size_binary_layer=size_binary_layer).to(device, dtype=torch.double)
         loss_fn = nn.CrossEntropyLoss().to(device)
+        optimiser = torch.optim.Adam(test_model.parameters(), lr=lr)
 
         def prepare_batch(n, k):
             def prepare_batch_(batch):
