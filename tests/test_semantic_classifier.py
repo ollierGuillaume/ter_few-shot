@@ -35,12 +35,12 @@ class TestSemanticClassification(unittest.TestCase):
         k = 200
         n = 5
         epochs = 20
-        size_binary_layer = 40
+        size_binary_layer = 80
         stochastic = True
         n_conv_layers = 4
         lr = 0.01
 
-        model_name = 'omniglot__n=5_k=200_epochs=500__lr=0.01__size_binary_layer=40__stochastic'
+        model_name = 'omniglot__n=5_k=200_epochs=500__lr=0.01__size_binary_layer=80__stochastic'
         validation_split = .2
 
         setup_dirs()
