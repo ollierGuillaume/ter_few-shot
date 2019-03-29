@@ -36,7 +36,7 @@ class TestSemanticClassification(unittest.TestCase):
         k = 200
         n = 5
         epochs = 20
-        size_binary_layer = 80
+        size_binary_layer = 10
         stochastic = True
         n_conv_layers = 4
         lr = 0.01
@@ -54,7 +54,7 @@ class TestSemanticClassification(unittest.TestCase):
         #                                  size_dense_layer_before_binary=None,
         #                                  n_conv_layers=n_conv_layers)
         #model = FewShotClassifier(1, k)
-        model = SemanticBinaryEncoder(1, 10, 10,stochastic=True)
+        model = SemanticBinaryEncoder(1, 10, 10, stochastic=True)
         model.load_state_dict(torch.load(os.path.join("models", "semantic_gan",
                                                      model_name+".pth")))
 
